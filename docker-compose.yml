@@ -29,6 +29,7 @@ services:
       - "8000:80"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./snippets:/etc/nginx/snippets:ro 
       - .:/app
     depends_on:
       - symfony_app
