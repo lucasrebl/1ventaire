@@ -7,7 +7,7 @@ DATABASE_URL="mysql://1ventaire_user:1ventaire_password@database:3306/1ventaire_
 
 docker-compose up -d
 
-docker exec -it symfony_mysql mysql -u root -p
+docker exec -it 1ventaire_mysql mysql -u root -p
 
 mdp : 1ventaire_root_password
 
