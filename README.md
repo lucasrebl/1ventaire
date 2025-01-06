@@ -27,4 +27,4 @@ Pour voir les bases de données :
 SHOW DATABASES;
 ```
 
-php -S 127.0.0.1:8000 -t public
+http://localhost:8000
