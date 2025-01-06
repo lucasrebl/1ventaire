@@ -14,7 +14,7 @@ mdp : 1ventaire_root_password
 pour créer l'user mysql
 
 CREATE USER '1ventaire_user'@'%' IDENTIFIED BY '1ventaire_password';
-GRANT ALL PRIVILEGES ON symfony_db.* TO '1ventaire_user'@'%';
+GRANT ALL PRIVILEGES ON 1ventaire_db.* TO '1ventaire_user'@'%';
 FLUSH PRIVILEGES;
 
 SHOW DATABASES;
