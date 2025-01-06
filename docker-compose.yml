@@ -1,5 +1,5 @@
 services:
-  symfony_app:
+  app:
     build: .
     container_name: 1ventaire_app
     ports:
@@ -32,7 +32,7 @@ services:
       - ./snippets:/etc/nginx/snippets:ro 
       - .:/app
     depends_on:
-      - symfony_app
+      - app
 
 volumes:
   db_data:
