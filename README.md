@@ -21,7 +21,4 @@ SHOW DATABASES;
 
 exit
 
-
-pour lancer le server
-
-php -S 127.0.0.1:8000 -t public
+http://localhost:8000
