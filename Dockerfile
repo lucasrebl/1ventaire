@@ -5,7 +5,7 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     libzip-dev \
     unzip \
-    && docker-php-ext-install
+    && docker-php-ext-install pdo pdo_mysql
 
 WORKDIR /app
 COPY . /app
