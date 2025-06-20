@@ -1,0 +1,151 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ inventory.name }} - 1ventaire{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+{% endblock %}
+
+{% block body %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+        <a class="navbar-brand" href="{{ path('app_home') }}">1ventaire</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_inventory_index') }}">Mes inventaires</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_item_expiring_soon') }}">Articles expirant bientôt</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                        {{ app.user.firstName }}
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ path('app_user_profile') }}">Mon profil</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{{ path('app_logout') }}">Déconnexion</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ path('app_inventory_index') }}">Mes inventaires</a></li>
+            <li class="breadcrumb-item active">{{ inventory.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>{{ inventory.name }}</h1>
+        <div>
+            <a href="{{ path('app_item_new', {'inventory_id': inventory.id}) }}" class="btn btn-success">
+                <i class="bi bi-plus-circle me-2"></i>Ajouter un article
+            </a>
+            <a href="{{ path('app_inventory_edit', {'id': inventory.id}) }}" class="btn btn-secondary ms-2">
+                <i class="bi bi-gear me-2"></i>Gérer l'inventaire
+            </a>
+        </div>
+    </div>
+
+    {% if inventory.description %}
+        <div class="alert alert-light mb-4">
+            {{ inventory.description }}
+        </div>
+    {% endif %}
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Statistiques</h5>
+                    <p>Nombre total d'articles: {{ inventory.items|length }}</p>
+                    <p>Catégories: {{ inventory.categories|length }}</p>
+                    <p>Emplacements: {{ inventory.locations|length }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="mb-3">Articles</h2>
+
+    {% if inventory.items|length > 0 %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Catégorie</th>
+                        <th>Emplacement</th>
+                        <th>Quantité</th>
+                        <th>Date d'expiration</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in inventory.items %}
+                        <tr>
+                            <td>
+                                {% if item.image %}
+                                    <img src="{{ asset('uploads/items/' ~ item.image) }}" alt="{{ item.name }}" class="img-thumbnail me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                {% endif %}
+                                {{ item.name }}
+                            </td>
+                            <td>{{ item.category ? item.category.name : 'N/A' }}</td>
+                            <td>{{ item.location ? item.location.name : 'N/A' }}</td>
+                            <td>{{ item.quantity ?: 1 }}</td>
+                            <td>
+                                {% if item.expiryDate %}
+                                    {% set daysLeft = ((item.expiryDate|date('U') - "now"|date('U')) / 86400)|round %}
+                                    {% if daysLeft < 0 %}
+                                        <span class="badge bg-danger">Expiré depuis {{ daysLeft|abs }} jour(s)</span>
+                                    {% elseif daysLeft <= 7 %}
+                                        <span class="badge bg-warning text-dark">Expire dans {{ daysLeft }} jour(s)</span>
+                                    {% else %}
+                                        {{ item.expiryDate|date('d/m/Y') }}
+                                    {% endif %}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ path('app_item_show', {'id': item.id}) }}" class="btn btn-sm btn-info">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{{ path('app_item_edit', {'id': item.id}) }}" class="btn btn-sm btn-secondary ms-1">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form method="post" action="{{ path('app_item_delete', {'id': item.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet article ?');" style="display: inline-block;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ item.id) }}">
+                                    <button class="btn btn-sm btn-danger ms-1">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <p class="mb-0">Cet inventaire est vide. <a href="{{ path('app_item_new', {'inventory_id': inventory.id}) }}">Ajoutez un article</a> pour commencer à l'utiliser.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

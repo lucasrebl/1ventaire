@@ -1,0 +1,134 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des catégories - 1ventaire{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+{% endblock %}
+
+{% block body %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+        <a class="navbar-brand" href="{{ path('app_home') }}">1ventaire</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_inventory_index') }}">Mes inventaires</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_item_expiring_soon') }}">Articles expirant bientôt</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                        Paramètres
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item active" href="{{ path('app_category_index') }}">Catégories</a></li>
+                        <li><a class="dropdown-item" href="{{ path('app_location_index') }}">Emplacements</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                        {{ app.user.firstName }}
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ path('app_user_profile') }}">Mon profil</a></li>
+                        <li><a class="dropdown-item" href="{{ path('app_user_change_password') }}">Changer mot de passe</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{{ path('app_logout') }}">Déconnexion</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Gestion des catégories</h1>
+        <a href="{{ path('app_category_new') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> Nouvelle catégorie
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            {% if categories|length > 0 %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Couleur</th>
+                                <th>Description</th>
+                                <th>Nombre d'articles</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for category in categories %}
+                                <tr>
+                                    <td>{{ category.name }}</td>
+                                    <td>
+                                        {% if category.color %}
+                                            <div class="d-flex align-items-center">
+                                                <div style="width: 24px; height: 24px; background-color: {{ category.color }}; border-radius: 4px; margin-right: 8px;"></div>
+                                                <span>{{ category.color }}</span>
+                                            </div>
+                                        {% else %}
+                                            <span class="text-muted">Non définie</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ category.description|default('Aucune description') }}</td>
+                                    <td>{{ category.items|length }}</td>
+                                    <td>
+                                        <a href="{{ path('app_category_edit', {'id': category.id}) }}" class="btn btn-sm btn-secondary">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        {% if category.items|length == 0 %}
+                                            <form method="post" action="{{ path('app_category_delete', {'id': category.id}) }}" style="display: inline-block;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?');">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ category.id) }}">
+                                                <button class="btn btn-sm btn-danger">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        {% else %}
+                                            <button class="btn btn-sm btn-danger" disabled title="Cette catégorie est utilisée et ne peut pas être supprimée">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-4">
+                    <p class="text-muted">Vous n'avez pas encore créé de catégories.</p>
+                    <a href="{{ path('app_category_new') }}" class="btn btn-primary">Créer ma première catégorie</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

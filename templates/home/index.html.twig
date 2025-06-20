@@ -1,0 +1,168 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}1ventaire - Gérez vos biens domestiques{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .hero-section {
+            padding: 5rem 0;
+            background-color: #f8f9fa;
+        }
+        .feature-card {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            height: 100%;
+        }
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #0d6efd;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+        <a class="navbar-brand" href="{{ path('app_home') }}">1ventaire</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="#features">Fonctionnalités</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#how-it-works">Comment ça marche</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#contact">Contact</a>
+                </li>
+                {% if app.user %}
+                    <li class="nav-item">
+                        <a class="btn btn-primary" href="{{ path('app_inventory_index') }}">Mon espace</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="btn btn-primary" href="{{ path('app_login') }}">Connexion</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1>Simplifiez la gestion de vos biens domestiques</h1>
+                <p class="lead">1ventaire vous aide à suivre, organiser et optimiser tous vos biens, des aliments aux vêtements, en passant par les objets du quotidien.</p>
+                <div class="mt-4">
+                    <a href="{{ path('app_register') }}" class="btn btn-primary btn-lg me-2">Essayer gratuitement</a>
+                    <a href="#features" class="btn btn-outline-secondary btn-lg">En savoir plus</a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <img src="https://via.placeholder.com/600x400" alt="1ventaire App" class="img-fluid rounded">
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5" id="features">
+    <div class="container">
+        <h2 class="text-center mb-5">Nos fonctionnalités principales</h2>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Scan des codes-barres</h3>
+                    <p>Ajoutez facilement des articles à votre inventaire en scannant simplement leur code-barre ou QR code.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">🔔</div>
+                    <h3>Alertes de péremption</h3>
+                    <p>Recevez des notifications avant que vos aliments n'arrivent à expiration pour réduire le gaspillage.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Analyses détaillées</h3>
+                    <p>Obtenez des rapports sur l'utilisation de vos biens et des recommandations d'achat personnalisées.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5 bg-light" id="how-it-works">
+    <div class="container">
+        <h2 class="text-center mb-5">Comment ça marche</h2>
+        <div class="row">
+            <div class="col-md-3 text-center">
+                <div class="mb-3">1️⃣</div>
+                <h4>Créez un compte</h4>
+                <p>Inscrivez-vous gratuitement en quelques clics</p>
+            </div>
+            <div class="col-md-3 text-center">
+                <div class="mb-3">2️⃣</div>
+                <h4>Ajoutez vos objets</h4>
+                <p>Scannez ou entrez manuellement vos articles</p>
+            </div>
+            <div class="col-md-3 text-center">
+                <div class="mb-3">3️⃣</div>
+                <h4>Organisez par catégories</h4>
+                <p>Classez vos biens par type et emplacement</p>
+            </div>
+            <div class="col-md-3 text-center">
+                <div class="mb-3">4️⃣</div>
+                <h4>Gérez efficacement</h4>
+                <p>Suivez, mettez à jour et optimisez votre inventaire</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5" id="contact">
+    <div class="container">
+        <h2 class="text-center mb-5">Contact</h2>
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <p class="text-center">Pour toute question ou assistance, contactez-nous à <a href="mailto:support@1ventaire.com">support@1ventaire.com</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer class="bg-dark text-light py-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h5>1ventaire</h5>
+                <p>Simplifiez la gestion de votre foyer</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <p>&copy; 2025 1ventaire. Tous droits réservés.</p>
+            </div>
+        </div>
+    </div>
+</footer>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}
