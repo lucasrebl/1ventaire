@@ -2,13 +2,15 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Form\ChangePasswordType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/user')]
@@ -24,9 +26,12 @@ class UserController extends AbstractController
     }
     
     #[Route('/change-password', name: 'app_user_change_password', methods: ['GET', 'POST'])]
-    public function changePassword(Request $request, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $entityManager): Response
-    {
-        $user = $this->getUser();
+    public function changePassword(
+        Request $request,
+        UserPasswordHasherInterface $passwordHasher,
+        EntityManagerInterface $entityManager,
+        #[CurrentUser] User $user
+    ): Response {
         $form = $this->createForm(ChangePasswordType::class);
         $form->handleRequest($request);
 
@@ -54,7 +59,7 @@ class UserController extends AbstractController
         }
 
         return $this->render('user/change_password.html.twig', [
-            'form' => $form->createView(),
+            'form' => $form,
         ]);
     }
 }

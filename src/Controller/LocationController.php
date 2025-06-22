@@ -9,7 +9,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/location')]
@@ -17,10 +18,10 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class LocationController extends AbstractController
 {
     #[Route('/', name: 'app_location_index', methods: ['GET'])]
-    public function index(LocationRepository $locationRepository): Response
+    public function index(LocationRepository $locationRepository, #[CurrentUser] $user): Response
     {
         return $this->render('location/index.html.twig', [
-            'locations' => $locationRepository->findByOwner($this->getUser()),
+            'locations' => $locationRepository->findByUser($user),
         ]);
     }
 
@@ -28,7 +29,6 @@ class LocationController extends AbstractController
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $location = new Location();
-        $location->setOwner($this->getUser());
         $form = $this->createForm(LocationType::class, $location);
         $form->handleRequest($request);
 

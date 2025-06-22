@@ -59,7 +59,7 @@ class ItemType extends AbstractType
                             'image/jpeg',
                             'image/png',
                         ],
-                        'mimeTypesMessage' => 'Veuillez uploader une image valide (JPG ou PNG)',
+                        'mimeTypesMessage' => 'Veuillez uploader une image valide (JPG ou PNG) de moins de 5 Mo.',
                     ]),
                 ],
             ])
