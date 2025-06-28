@@ -20,8 +20,22 @@ class LocationController extends AbstractController
     #[Route('/', name: 'app_location_index', methods: ['GET'])]
     public function index(LocationRepository $locationRepository, #[CurrentUser] $user): Response
     {
+        $locations = $locationRepository->findBy(['user' => $user], ['name' => 'ASC']);
+        
+        // Pour chaque emplacement, déterminer si il peut être supprimé (si il n'a pas d'articles associés)
+        $locationPermissions = [];
+        foreach ($locations as $location) {
+            $canDelete = count($location->getItems()) === 0;
+            $locationPermissions[$location->getId()] = [
+                'can_edit' => true, // L'utilisateur peut toujours éditer ses propres emplacements
+                'can_delete' => $canDelete,
+                'delete_message' => !$canDelete ? 'Cet emplacement ne peut pas être supprimé car il est utilisé par des articles.' : '',
+            ];
+        }
+        
         return $this->render('location/index.html.twig', [
-            'locations' => $locationRepository->findBy(['user' => $user], ['name' => 'ASC']),
+            'locations' => $locations,
+            'location_permissions' => $locationPermissions,
         ]);
     }
 

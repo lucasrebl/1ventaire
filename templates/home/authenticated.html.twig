@@ -348,15 +348,34 @@
                                             </span>
                                         </td>
                                         <td>
-                                            <a href="{{ path('app_item_edit', {'id': item.id}) }}" class="btn btn-sm btn-outline-secondary">
-                                                <i class="bi bi-pencil"></i>
-                                            </a>
-                                            <form method="post" id="delete-form-item-expired-{{ item.id }}" action="{{ path('app_item_delete', {'id': item.id}) }}" style="display: inline-block;">
-                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ item.id) }}">
-                                                <button type="button" class="btn btn-sm btn-outline-danger" data-delete-form="delete-form-item-expired-{{ item.id }}" data-delete-message="Êtes-vous sûr de vouloir supprimer cet article expiré ?">
+                                            {% if is_granted('edit', item) %}
+                                                <a href="{{ path('app_item_edit', {'id': item.id}) }}" class="btn btn-sm btn-outline-secondary">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                            {% else %}
+                                                <button class="btn btn-sm btn-outline-secondary disabled"
+                                                        data-bs-toggle="tooltip"
+                                                        data-bs-placement="top"
+                                                        title="Vous n'avez pas les droits nécessaires pour modifier cet article">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                            {% endif %}
+                                            
+                                            {% if is_granted('delete', item) %}
+                                                <form method="post" id="delete-form-item-expired-{{ item.id }}" action="{{ path('app_item_delete', {'id': item.id}) }}" style="display: inline-block;">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ item.id) }}">
+                                                    <button type="button" class="btn btn-sm btn-outline-danger" data-delete-form="delete-form-item-expired-{{ item.id }}" data-delete-message="Êtes-vous sûr de vouloir supprimer cet article expiré ?">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            {% else %}
+                                                <button class="btn btn-sm btn-outline-danger disabled"
+                                                        data-bs-toggle="tooltip"
+                                                        data-bs-placement="top"
+                                                        title="Vous n'avez pas les droits nécessaires pour supprimer cet article">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
-                                            </form>
+                                            {% endif %}
                                         </td>
                                     </tr>
                                 {% endfor %}

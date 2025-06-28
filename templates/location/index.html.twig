@@ -82,7 +82,7 @@
                                         <a href="{{ path('app_location_edit', {'id': location.id}) }}" class="btn btn-sm btn-secondary">
                                             <i class="bi bi-pencil"></i>
                                         </a>
-                                        {% if location.items|length == 0 %}
+                                        {% if location_permissions[location.id].can_delete %}
                                             <form method="post" id="delete-form-location-{{ location.id }}" action="{{ path('app_location_delete', {'id': location.id}) }}" style="display: inline-block;">
                                                 <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ location.id) }}">
                                                 <button type="button" class="btn btn-sm btn-danger" data-delete-form="delete-form-location-{{ location.id }}" data-delete-message="Êtes-vous sûr de vouloir supprimer cet emplacement ?">
@@ -90,7 +90,10 @@
                                                 </button>
                                             </form>
                                         {% else %}
-                                            <button class="btn btn-sm btn-danger" disabled title="Cet emplacement est utilisé et ne peut pas être supprimé">
+                                            <button class="btn btn-sm btn-danger" disabled 
+                                                data-bs-toggle="tooltip" 
+                                                data-bs-placement="top" 
+                                                title="{{ location_permissions[location.id].delete_message }}">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         {% endif %}
@@ -114,4 +117,22 @@
 {% block javascripts %}
     {{ parent() }}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialise les tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // Gestion des boutons de suppression
+            document.querySelectorAll('[data-delete-form]').forEach(button => {
+                button.addEventListener('click', function() {
+                    if (confirm(this.getAttribute('data-delete-message'))) {
+                        document.getElementById(this.getAttribute('data-delete-form')).submit();
+                    }
+                });
+            });
+        });
+    </script>
 {% endblock %}

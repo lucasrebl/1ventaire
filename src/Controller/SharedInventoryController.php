@@ -19,11 +19,21 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class SharedInventoryController extends AbstractController
 {
     #[Route('/share/{id}', name: 'app_inventory_share', methods: ['GET', 'POST'])]
-    public function share(Request $request, Inventory $inventory, EntityManagerInterface $entityManager, UserRepository $userRepository): Response
+    public function share(Request $request, int $id, EntityManagerInterface $entityManager, UserRepository $userRepository): Response
     {
+        // Récupérer l'inventaire manuellement pour gérer le cas où il n'existe pas
+        $inventory = $entityManager->getRepository(Inventory::class)->find($id);
+        
+        // Rediriger vers la liste des inventaires si l'inventaire n'existe pas
+        if (!$inventory) {
+            $this->addFlash('error', 'L\'inventaire demandé n\'existe pas.');
+            return $this->redirectToRoute('app_inventory_index');
+        }
+        
         // Vérifie si l'utilisateur est le propriétaire de l'inventaire
         if ($inventory->getOwner() !== $this->getUser()) {
-            throw $this->createAccessDeniedException('Vous n\'avez pas l\'autorisation de partager cet inventaire.');
+            $this->addFlash('error', 'Vous n\'avez pas l\'autorisation de partager cet inventaire.');
+            return $this->redirectToRoute('app_inventory_index');
         }
 
         $sharedInventory = new SharedInventory();
@@ -77,8 +87,17 @@ class SharedInventoryController extends AbstractController
     }
     
     #[Route('/remove/{id}', name: 'app_shared_inventory_remove', methods: ['POST'])]
-    public function remove(Request $request, SharedInventory $sharedInventory, EntityManagerInterface $entityManager): Response
+    public function remove(Request $request, int $id, EntityManagerInterface $entityManager): Response
     {
+        // Récupérer le partage manuellement pour gérer le cas où il n'existe pas
+        $sharedInventory = $entityManager->getRepository(SharedInventory::class)->find($id);
+        
+        // Rediriger vers la liste des inventaires si le partage n'existe pas
+        if (!$sharedInventory) {
+            $this->addFlash('error', 'Le partage demandé n\'existe pas.');
+            return $this->redirectToRoute('app_inventory_index');
+        }
+        
         // Récupération de l'inventaire pour pouvoir rediriger même en cas d'erreur
         $inventory = $sharedInventory->getInventory();
 
@@ -106,8 +125,17 @@ class SharedInventoryController extends AbstractController
     }
     
     #[Route('/edit/{id}', name: 'app_shared_inventory_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, SharedInventory $sharedInventory, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, int $id, EntityManagerInterface $entityManager): Response
     {
+        // Récupérer le partage manuellement pour gérer le cas où il n'existe pas
+        $sharedInventory = $entityManager->getRepository(SharedInventory::class)->find($id);
+        
+        // Rediriger vers la liste des inventaires si le partage n'existe pas
+        if (!$sharedInventory) {
+            $this->addFlash('error', 'Le partage demandé n\'existe pas.');
+            return $this->redirectToRoute('app_inventory_index');
+        }
+        
         // Récupération de l'inventaire pour pouvoir rediriger même en cas d'erreur
         $inventory = $sharedInventory->getInventory();
 

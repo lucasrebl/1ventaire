@@ -30,9 +30,13 @@ class ItemController extends AbstractController
         $inventoryRepository = $entityManager->getRepository(\App\Entity\Inventory::class);
         $inventory = $inventoryRepository->find($inventory_id);
         
-        if (!$inventory || $inventory->getOwner() !== $this->getUser()) {
-            throw $this->createAccessDeniedException();
+        if (!$inventory) {
+            throw $this->createNotFoundException('L\'inventaire demandé n\'existe pas.');
         }
+        
+        // Utiliser le voter pour vérifier si l'utilisateur a le droit d'éditer cet inventaire
+        $this->denyAccessUnlessGranted('edit', $inventory, 'Vous n\'avez pas les droits nécessaires pour ajouter des articles à cet inventaire.');
+        
         
         $item = new Item();
         $item->setInventory($inventory);
@@ -59,14 +63,21 @@ class ItemController extends AbstractController
         $item = $itemRepository->find($id);
         
         if (!$item) {
-            throw $this->createNotFoundException('L\'article demandé n\'existe pas.');
+            $this->addFlash('error', 'L\'article demandé n\'existe pas.');
+            return $this->redirectToRoute('app_inventory_index');
         }
         
-        try {
-            $this->denyAccessUnlessGranted('view', $item);
-        } catch (\Exception $e) {
+        // Vérifier si l'utilisateur a les droits de voir cet article
+        if (!$this->isGranted('view', $item)) {
             $this->addFlash('error', 'Vous n\'avez pas les droits nécessaires pour voir cet article.');
-            return $this->redirectToRoute('app_inventory_show', ['id' => $item->getInventory()->getId()]);
+            
+            // Si possible, rediriger vers la page de l'inventaire
+            try {
+                return $this->redirectToRoute('app_inventory_show', ['id' => $item->getInventory()->getId()]);
+            } catch (\Exception $e) {
+                // En cas d'erreur, rediriger vers la liste des inventaires
+                return $this->redirectToRoute('app_inventory_index');
+            }
         }
         
         // Récupérer les droits d'accès pour les passer au template
@@ -96,12 +107,12 @@ class ItemController extends AbstractController
         $item = $itemRepository->find($id);
         
         if (!$item) {
-            throw $this->createNotFoundException('L\'article demandé n\'existe pas.');
+            $this->addFlash('error', 'L\'article demandé n\'existe pas.');
+            return $this->redirectToRoute('app_inventory_index');
         }
         
-        try {
-            $this->denyAccessUnlessGranted('edit', $item);
-        } catch (\Exception $e) {
+        // Vérifier si l'utilisateur a les droits de modifier cet article
+        if (!$this->isGranted('edit', $item)) {
             $this->addFlash('error', 'Vous n\'avez pas les droits nécessaires pour modifier cet article.');
             return $this->redirectToRoute('app_item_show', ['id' => $item->getId()]);
         }

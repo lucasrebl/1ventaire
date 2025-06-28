@@ -81,9 +81,18 @@
                                 <a href="{{ path('app_item_show', {'id': item.id}) }}" class="btn btn-sm btn-info">
                                     <i class="bi bi-eye"></i>
                                 </a>
-                                <a href="{{ path('app_item_edit', {'id': item.id}) }}" class="btn btn-sm btn-secondary ms-1">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
+                                {% if is_granted('edit', item) %}
+                                    <a href="{{ path('app_item_edit', {'id': item.id}) }}" class="btn btn-sm btn-secondary ms-1">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                {% else %}
+                                    <button class="btn btn-sm btn-secondary ms-1 disabled" 
+                                            data-bs-toggle="tooltip" 
+                                            data-bs-placement="top" 
+                                            title="Vous n'avez pas les droits nécessaires pour modifier cet article">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}
@@ -101,4 +110,13 @@
 {% block javascripts %}
     {{ parent() }}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialise les tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
 {% endblock %}

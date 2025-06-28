@@ -19,8 +19,22 @@ class CategoryController extends AbstractController
     #[Route('/', name: 'app_category_index', methods: ['GET'])]
     public function index(CategoryRepository $categoryRepository): Response
     {
+        $categories = $categoryRepository->findBy(['user' => $this->getUser()], ['name' => 'ASC']);
+        
+        // Pour chaque catégorie, déterminer si elle peut être supprimée (si elle n'a pas d'articles associés)
+        $categoryPermissions = [];
+        foreach ($categories as $category) {
+            $canDelete = count($category->getItems()) === 0;
+            $categoryPermissions[$category->getId()] = [
+                'can_edit' => true, // L'utilisateur peut toujours éditer ses propres catégories
+                'can_delete' => $canDelete,
+                'delete_message' => !$canDelete ? 'Cette catégorie ne peut pas être supprimée car elle est utilisée par des articles.' : '',
+            ];
+        }
+        
         return $this->render('category/index.html.twig', [
-            'categories' => $categoryRepository->findBy(['user' => $this->getUser()], ['name' => 'ASC']),
+            'categories' => $categories,
+            'category_permissions' => $categoryPermissions,
         ]);
     }
 
