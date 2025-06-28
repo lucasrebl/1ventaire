@@ -15,8 +15,6 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Form\Extension\Core\Type\FileType;
-use Symfony\Component\Validator\Constraints\File;
 
 class ItemType extends AbstractType
 {
@@ -47,21 +45,6 @@ class ItemType extends AbstractType
             ->add('barcode', TextType::class, [
                 'label' => 'Code-barres (optionnel)',
                 'required' => false,
-            ])
-            ->add('imageFile', FileType::class, [
-                'label' => 'Image (optionnelle)',
-                'mapped' => false,
-                'required' => false,
-                'constraints' => [
-                    new File([
-                        'maxSize' => '5M',
-                        'mimeTypes' => [
-                            'image/jpeg',
-                            'image/png',
-                        ],
-                        'mimeTypesMessage' => 'Veuillez uploader une image valide (JPG ou PNG) de moins de 5 Mo.',
-                    ]),
-                ],
             ])
             ->add('expiryDate', DateType::class, [
                 'label' => 'Date de péremption (optionnelle)',

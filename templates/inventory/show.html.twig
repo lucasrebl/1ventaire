@@ -21,8 +21,12 @@
                     <a class="nav-link" href="{{ path('app_inventory_index') }}">Mes inventaires</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ path('app_item_expiring_soon') }}">Articles expirant bientôt</a>
+                    <a class="nav-link" href="{{ path('app_category_index') }}">Catégories</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_location_index') }}">Emplacements</a>
+                </li>
+
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
                         {{ app.user.firstName }}
@@ -39,6 +43,15 @@
 </nav>
 
 <div class="container mt-4">
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+    
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ path('app_inventory_index') }}">Mes inventaires</a></li>
@@ -96,9 +109,6 @@
                     {% for item in inventory.items %}
                         <tr>
                             <td>
-                                {% if item.image %}
-                                    <img src="{{ asset('uploads/items/' ~ item.image) }}" alt="{{ item.name }}" class="img-thumbnail me-2" style="width: 40px; height: 40px; object-fit: cover;">
-                                {% endif %}
                                 {{ item.name }}
                             </td>
                             <td>{{ item.category ? item.category.name : 'N/A' }}</td>
@@ -125,9 +135,9 @@
                                 <a href="{{ path('app_item_edit', {'id': item.id}) }}" class="btn btn-sm btn-secondary ms-1">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-                                <form method="post" action="{{ path('app_item_delete', {'id': item.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet article ?');" style="display: inline-block;">
+                                <form method="post" id="delete-form-item-{{ item.id }}" action="{{ path('app_item_delete', {'id': item.id}) }}" style="display: inline-block;">
                                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ item.id) }}">
-                                    <button class="btn btn-sm btn-danger ms-1">
+                                    <button type="button" class="btn btn-sm btn-danger ms-1" data-delete-form="delete-form-item-{{ item.id }}" data-delete-message="Êtes-vous sûr de vouloir supprimer cet article ?">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </form>

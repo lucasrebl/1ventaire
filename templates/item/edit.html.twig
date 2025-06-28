@@ -20,9 +20,7 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ path('app_inventory_index') }}">Mes inventaires</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ path('app_item_expiring_soon') }}">Articles expirant bientôt</a>
-                </li>
+
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
                         {{ app.user.firstName }}
@@ -80,17 +78,7 @@
                             {{ form_errors(form.barcode) }}
                         </div>
                         
-                        <div class="mb-3">
-                            {{ form_label(form.imageFile) }}
-                            {% if item.image %}
-                                <div class="mb-2">
-                                    <img src="{{ asset('uploads/items/' ~ item.image) }}" alt="{{ item.name }}" class="img-thumbnail" style="max-width: 150px">
-                                    <p class="text-muted">Image actuelle</p>
-                                </div>
-                            {% endif %}
-                            {{ form_widget(form.imageFile, {'attr': {'class': 'form-control'}}) }}
-                            {{ form_errors(form.imageFile) }}
-                        </div>
+
                         
                         <div class="mb-3">
                             {{ form_label(form.expiryDate) }}

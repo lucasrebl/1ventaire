@@ -21,16 +21,10 @@
                     <a class="nav-link" href="{{ path('app_inventory_index') }}">Mes inventaires</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ path('app_item_expiring_soon') }}">Articles expirant bientôt</a>
+                    <a class="nav-link active" href="{{ path('app_category_index') }}">Catégories</a>
                 </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                        Paramètres
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item active" href="{{ path('app_category_index') }}">Catégories</a></li>
-                        <li><a class="dropdown-item" href="{{ path('app_location_index') }}">Emplacements</a></li>
-                    </ul>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_location_index') }}">Emplacements</a>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
@@ -100,9 +94,9 @@
                                             <i class="bi bi-pencil"></i>
                                         </a>
                                         {% if category.items|length == 0 %}
-                                            <form method="post" action="{{ path('app_category_delete', {'id': category.id}) }}" style="display: inline-block;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?');">
+                                            <form method="post" id="delete-form-category-{{ category.id }}" action="{{ path('app_category_delete', {'id': category.id}) }}" style="display: inline-block;">
                                                 <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ category.id) }}">
-                                                <button class="btn btn-sm btn-danger">
+                                                <button type="button" class="btn btn-sm btn-danger" data-delete-form="delete-form-category-{{ category.id }}" data-delete-message="Êtes-vous sûr de vouloir supprimer cette catégorie ?">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
                                             </form>

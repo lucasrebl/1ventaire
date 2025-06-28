@@ -20,9 +20,7 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ path('app_inventory_index') }}">Mes inventaires</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="{{ path('app_item_expiring_soon') }}">Articles expirant bientôt</a>
-                </li>
+
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
                         {{ app.user.firstName }}
@@ -60,9 +58,6 @@
                     {% for item in items %}
                         <tr>
                             <td>
-                                {% if item.image %}
-                                    <img src="{{ asset('uploads/items/' ~ item.image) }}" alt="{{ item.name }}" class="img-thumbnail me-2" style="width: 40px; height: 40px; object-fit: cover;">
-                                {% endif %}
                                 {{ item.name }}
                             </td>
                             <td><a href="{{ path('app_inventory_show', {'id': item.inventory.id}) }}">{{ item.inventory.name }}</a></td>

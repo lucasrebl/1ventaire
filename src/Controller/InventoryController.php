@@ -82,9 +82,15 @@ class InventoryController extends AbstractController
     {
         $this->denyAccessUnlessGranted('delete', $inventory);
         
+        if ($inventory->getItems()->count() > 0) {
+            $this->addFlash('error', 'Impossible de supprimer cet inventaire car il contient des articles. Veuillez d\'abord supprimer tous les articles.');
+            return $this->redirectToRoute('app_inventory_show', ['id' => $inventory->getId()]);
+        }
+        
         if ($this->isCsrfTokenValid('delete'.$inventory->getId(), $request->request->get('_token'))) {
             $entityManager->remove($inventory);
             $entityManager->flush();
+            $this->addFlash('success', 'L\'inventaire a été supprimé avec succès.');
         }
 
         return $this->redirectToRoute('app_inventory_index');

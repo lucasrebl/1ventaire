@@ -20,4 +20,15 @@ class CategoryRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Category::class);
     }
+
+    public function findByOwner($user)
+    {
+        return $this->createQueryBuilder('c')
+            ->join('c.inventory', 'i')
+            ->where('i.owner = :user')
+            ->setParameter('user', $user)
+            ->orderBy('c.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

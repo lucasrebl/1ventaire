@@ -34,20 +34,30 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="#features">Fonctionnalités</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#how-it-works">Comment ça marche</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#contact">Contact</a>
-                </li>
                 {% if app.user %}
                     <li class="nav-item">
-                        <a class="btn btn-primary" href="{{ path('app_inventory_index') }}">Mon espace</a>
+                        <a class="nav-link" href="{{ path('app_inventory_index') }}">Mes inventaires</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            {{ app.user.firstName }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ path('app_user_profile') }}">Mon profil</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ path('app_logout') }}">Déconnexion</a></li>
+                        </ul>
                     </li>
                 {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="#features">Fonctionnalités</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#how-it-works">Comment ça marche</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#contact">Contact</a>
+                    </li>
                     <li class="nav-item">
                         <a class="btn btn-primary" href="{{ path('app_login') }}">Connexion</a>
                     </li>

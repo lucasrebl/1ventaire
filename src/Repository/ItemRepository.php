@@ -22,42 +22,7 @@ class ItemRepository extends ServiceEntityRepository
         parent::__construct($registry, Item::class);
     }
     
-    /**
-     * Find items expiring soon
-     */
-    public function findItemsExpiringSoon(int $days = 7)
-    {
-        $date = new \DateTime();
-        $date->modify('+'.$days.' days');
-        
-        return $this->createQueryBuilder('i')
-            ->andWhere('i.expiryDate IS NOT NULL')
-            ->andWhere('i.expiryDate <= :date')
-            ->setParameter('date', $date)
-            ->orderBy('i.expiryDate', 'ASC')
-            ->getQuery()
-            ->getResult();
-    }
-    
-    /**
-     * Find items expiring soon for a specific user
-     */
-    public function findItemsExpiringSoonByUser(User $user, int $days = 7)
-    {
-        $date = new \DateTime();
-        $date->modify('+'.$days.' days');
-        
-        return $this->createQueryBuilder('i')
-            ->join('i.inventory', 'inv')
-            ->andWhere('inv.owner = :user')
-            ->andWhere('i.expiryDate IS NOT NULL')
-            ->andWhere('i.expiryDate <= :date')
-            ->setParameter('user', $user)
-            ->setParameter('date', $date)
-            ->orderBy('i.expiryDate', 'ASC')
-            ->getQuery()
-            ->getResult();
-    }
+
     
     /**
      * Find items by user

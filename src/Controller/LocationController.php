@@ -28,7 +28,16 @@ class LocationController extends AbstractController
     #[Route('/new', name: 'app_location_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
+        // Récupérer un inventaire de l'utilisateur actuel
+        $inventory = $entityManager->getRepository(\App\Entity\Inventory::class)->findOneBy(['owner' => $this->getUser()]);
+        
+        if (!$inventory) {
+            $this->addFlash('error', 'Vous devez créer un inventaire avant de pouvoir ajouter un emplacement.');
+            return $this->redirectToRoute('app_inventory_new');
+        }
+        
         $location = new Location();
+        $location->setInventory($inventory);
         $form = $this->createForm(LocationType::class, $location);
         $form->handleRequest($request);
 
@@ -49,7 +58,7 @@ class LocationController extends AbstractController
     #[Route('/{id}/edit', name: 'app_location_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Location $location, EntityManagerInterface $entityManager): Response
     {
-        if ($location->getOwner() !== $this->getUser()) {
+        if ($location->getInventory()->getOwner() !== $this->getUser()) {
             throw $this->createAccessDeniedException('Vous n\'avez pas accès à cet emplacement.');
         }
 
@@ -72,20 +81,29 @@ class LocationController extends AbstractController
     #[Route('/{id}', name: 'app_location_delete', methods: ['POST'])]
     public function delete(Request $request, Location $location, EntityManagerInterface $entityManager): Response
     {
-        if ($location->getOwner() !== $this->getUser()) {
-            throw $this->createAccessDeniedException('Vous n\'avez pas accès à cet emplacement.');
+        if ($location->getInventory()->getOwner() !== $this->getUser()) {
+            $this->addFlash('error', 'Vous n\'avez pas accès à cet emplacement.');
+            return $this->redirectToRoute('app_location_index');
         }
 
-        if ($this->isCsrfTokenValid('delete'.$location->getId(), $request->request->get('_token'))) {
-            // Vérifier si l'emplacement est utilisé par des articles
-            $items = $location->getItems();
-            if (count($items) > 0) {
-                $this->addFlash('error', 'Cet emplacement ne peut pas être supprimé car il est utilisé par des articles.');
-            } else {
-                $entityManager->remove($location);
-                $entityManager->flush();
-                $this->addFlash('success', 'L\'emplacement a été supprimé avec succès.');
-            }
+        if (!$this->isCsrfTokenValid('delete'.$location->getId(), $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token CSRF invalide.');
+            return $this->redirectToRoute('app_location_index');
+        }
+            
+        // Vérifier si l'emplacement est utilisé par des articles
+        $items = $location->getItems();
+        if (count($items) > 0) {
+            $this->addFlash('error', 'Cet emplacement ne peut pas être supprimé car il est utilisé par des articles.');
+            return $this->redirectToRoute('app_location_index');
+        }
+        
+        try {
+            $entityManager->remove($location);
+            $entityManager->flush();
+            $this->addFlash('success', 'L\'emplacement a été supprimé avec succès.');
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'Une erreur est survenue lors de la suppression de l\'emplacement.');
         }
 
         return $this->redirectToRoute('app_location_index');

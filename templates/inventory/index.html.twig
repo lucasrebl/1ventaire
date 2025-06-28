@@ -18,11 +18,15 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ path('app_inventory_index') }}">Mes inventaires</a>
+                    <a class="nav-link active" href="{{ path('app_inventory_index') }}">Mes inventaires</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ path('app_item_expiring_soon') }}">Articles expirant bientôt</a>
+                    <a class="nav-link" href="{{ path('app_category_index') }}">Catégories</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_location_index') }}">Emplacements</a>
+                </li>
+
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
                         {{ app.user.firstName }}
@@ -39,11 +43,28 @@
 </nav>
 
 <div class="container mt-4">
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Mes inventaires</h1>
-        <a href="{{ path('app_inventory_new') }}" class="btn btn-primary">
-            <i class="bi bi-plus-circle me-2"></i>Créer un nouvel inventaire
-        </a>
+        <div class="btn-group">
+            <a href="{{ path('app_inventory_new') }}" class="btn btn-primary me-2">
+                <i class="bi bi-plus-circle me-2"></i>Créer un nouvel inventaire
+            </a>
+            <a href="{{ path('app_category_new') }}" class="btn btn-success me-2">
+                <i class="bi bi-tags me-2"></i>Ajouter une catégorie
+            </a>
+            <a href="{{ path('app_location_new') }}" class="btn btn-info">
+                <i class="bi bi-geo-alt me-2"></i>Ajouter un emplacement
+            </a>
+        </div>
     </div>
 
     <div class="row">
@@ -62,11 +83,9 @@
                         <a href="{{ path('app_inventory_edit', {'id': inventory.id}) }}" class="btn btn-secondary ms-2">
                             <i class="bi bi-pencil me-1"></i>Modifier
                         </a>
-                        <form method="post" action="{{ path('app_inventory_delete', {'id': inventory.id}) }}" 
-                              onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet inventaire ?');" 
-                              style="display: inline-block;">
+                        <form method="post" id="delete-form-{{ inventory.id }}" action="{{ path('app_inventory_delete', {'id': inventory.id}) }}" style="display: inline-block;">
                             <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ inventory.id) }}">
-                            <button class="btn btn-danger ms-2">
+                            <button type="button" class="btn btn-danger ms-2" data-delete-form="delete-form-{{ inventory.id }}" data-delete-message="Êtes-vous sûr de vouloir supprimer cet inventaire ?">
                                 <i class="bi bi-trash me-1"></i>Supprimer
                             </button>
                         </form>

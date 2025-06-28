@@ -20,9 +20,7 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ path('app_inventory_index') }}">Mes inventaires</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ path('app_item_expiring_soon') }}">Articles expirant bientôt</a>
-                </li>
+
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
                         {{ app.user.firstName }}
@@ -39,6 +37,15 @@
 </nav>
 
 <div class="container mt-4">
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ path('app_inventory_index') }}">Mes inventaires</a></li>
@@ -55,11 +62,6 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        {% if item.image %}
-                            <div class="col-md-4 mb-3">
-                                <img src="{{ asset('uploads/items/' ~ item.image) }}" alt="{{ item.name }}" class="img-fluid rounded">
-                            </div>
-                        {% endif %}
                         <div class="col">
                             {% if item.description %}
                                 <p>{{ item.description }}</p>
@@ -124,9 +126,9 @@
                             <a href="{{ path('app_item_edit', {'id': item.id}) }}" class="btn btn-primary">
                                 <i class="bi bi-pencil me-1"></i>Modifier
                             </a>
-                            <form method="post" action="{{ path('app_item_delete', {'id': item.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet article ?');" style="display: inline-block;">
+                            <form method="post" id="delete-form-item-show-{{ item.id }}" action="{{ path('app_item_delete', {'id': item.id}) }}" style="display: inline-block;">
                                 <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ item.id) }}">
-                                <button class="btn btn-danger ms-1">
+                                <button type="button" class="btn btn-danger ms-1" data-delete-form="delete-form-item-show-{{ item.id }}" data-delete-message="Êtes-vous sûr de vouloir supprimer cet article ?">
                                     <i class="bi bi-trash me-1"></i>Supprimer
                                 </button>
                             </form>

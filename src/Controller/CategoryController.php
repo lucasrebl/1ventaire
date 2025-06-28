@@ -27,8 +27,16 @@ class CategoryController extends AbstractController
     #[Route('/new', name: 'app_category_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
+        // Récupérer un inventaire de l'utilisateur actuel
+        $inventory = $entityManager->getRepository(\App\Entity\Inventory::class)->findOneBy(['owner' => $this->getUser()]);
+        
+        if (!$inventory) {
+            $this->addFlash('error', 'Vous devez créer un inventaire avant de pouvoir ajouter une catégorie.');
+            return $this->redirectToRoute('app_inventory_new');
+        }
+        
         $category = new Category();
-        $category->setOwner($this->getUser());
+        $category->setInventory($inventory);
         $form = $this->createForm(CategoryType::class, $category);
         $form->handleRequest($request);
 
@@ -49,7 +57,7 @@ class CategoryController extends AbstractController
     #[Route('/{id}/edit', name: 'app_category_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Category $category, EntityManagerInterface $entityManager): Response
     {
-        if ($category->getOwner() !== $this->getUser()) {
+        if ($category->getInventory()->getOwner() !== $this->getUser()) {
             throw $this->createAccessDeniedException('Vous n\'avez pas accès à cette catégorie.');
         }
 
@@ -72,20 +80,29 @@ class CategoryController extends AbstractController
     #[Route('/{id}', name: 'app_category_delete', methods: ['POST'])]
     public function delete(Request $request, Category $category, EntityManagerInterface $entityManager): Response
     {
-        if ($category->getOwner() !== $this->getUser()) {
-            throw $this->createAccessDeniedException('Vous n\'avez pas accès à cette catégorie.');
+        if ($category->getInventory()->getOwner() !== $this->getUser()) {
+            $this->addFlash('error', 'Vous n\'avez pas accès à cette catégorie.');
+            return $this->redirectToRoute('app_category_index');
         }
 
-        if ($this->isCsrfTokenValid('delete'.$category->getId(), $request->request->get('_token'))) {
-            // Vérifier si la catégorie est utilisée par des articles
-            $items = $category->getItems();
-            if (count($items) > 0) {
-                $this->addFlash('error', 'Cette catégorie ne peut pas être supprimée car elle est utilisée par des articles.');
-            } else {
-                $entityManager->remove($category);
-                $entityManager->flush();
-                $this->addFlash('success', 'La catégorie a été supprimée avec succès.');
-            }
+        if (!$this->isCsrfTokenValid('delete'.$category->getId(), $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token CSRF invalide.');
+            return $this->redirectToRoute('app_category_index');
+        }
+            
+        // Vérifier si la catégorie est utilisée par des articles
+        $items = $category->getItems();
+        if (count($items) > 0) {
+            $this->addFlash('error', 'Cette catégorie ne peut pas être supprimée car elle est utilisée par des articles.');
+            return $this->redirectToRoute('app_category_index');
+        }
+        
+        try {
+            $entityManager->remove($category);
+            $entityManager->flush();
+            $this->addFlash('success', 'La catégorie a été supprimée avec succès.');
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'Une erreur est survenue lors de la suppression de la catégorie.');
         }
 
         return $this->redirectToRoute('app_category_index');

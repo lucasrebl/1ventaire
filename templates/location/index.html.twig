@@ -21,16 +21,10 @@
                     <a class="nav-link" href="{{ path('app_inventory_index') }}">Mes inventaires</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ path('app_item_expiring_soon') }}">Articles expirant bientôt</a>
+                    <a class="nav-link" href="{{ path('app_category_index') }}">Catégories</a>
                 </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle active" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                        Paramètres
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ path('app_category_index') }}">Catégories</a></li>
-                        <li><a class="dropdown-item active" href="{{ path('app_location_index') }}">Emplacements</a></li>
-                    </ul>
+                <li class="nav-item">
+                    <a class="nav-link active" href="{{ path('app_location_index') }}">Emplacements</a>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
@@ -53,15 +47,15 @@
         {% for message in messages %}
             <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
                 {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
             </div>
         {% endfor %}
     {% endfor %}
     
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Gestion des emplacements</h1>
-        <a href="{{ path('app_location_new') }}" class="btn btn-primary">
-            <i class="bi bi-plus-circle me-1"></i> Nouvel emplacement
+        <h1>Mes emplacements</h1>
+        <a href="{{ path('app_location_new') }}" class="btn btn-success">
+            <i class="bi bi-plus-circle me-2"></i>Créer un nouvel emplacement
         </a>
     </div>
 
@@ -89,9 +83,9 @@
                                             <i class="bi bi-pencil"></i>
                                         </a>
                                         {% if location.items|length == 0 %}
-                                            <form method="post" action="{{ path('app_location_delete', {'id': location.id}) }}" style="display: inline-block;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet emplacement ?');">
+                                            <form method="post" id="delete-form-location-{{ location.id }}" action="{{ path('app_location_delete', {'id': location.id}) }}" style="display: inline-block;">
                                                 <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ location.id) }}">
-                                                <button class="btn btn-sm btn-danger">
+                                                <button type="button" class="btn btn-sm btn-danger" data-delete-form="delete-form-location-{{ location.id }}" data-delete-message="Êtes-vous sûr de vouloir supprimer cet emplacement ?">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
                                             </form>

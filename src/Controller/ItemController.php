@@ -7,12 +7,10 @@ use App\Form\ItemType;
 use App\Repository\ItemRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[Route('/item')]
 #[IsGranted('ROLE_USER')]
@@ -27,7 +25,7 @@ class ItemController extends AbstractController
     }
 
     #[Route('/new/{inventory_id}', name: 'app_item_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, int $inventory_id, SluggerInterface $slugger): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, int $inventory_id): Response
     {
         $inventoryRepository = $entityManager->getRepository(\App\Entity\Inventory::class);
         $inventory = $inventoryRepository->find($inventory_id);
@@ -44,24 +42,6 @@ class ItemController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Gestion de l'upload d'image
-            $imageFile = $form->get('imageFile')->getData();
-            if ($imageFile) {
-                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
-                $safeFilename = $slugger->slug($originalFilename);
-                $newFilename = $safeFilename.'-'.uniqid('', true).'.'.$imageFile->guessExtension();
-
-                try {
-                    $imageFile->move(
-                        $this->getParameter('items_directory'),
-                        $newFilename
-                    );
-                    $item->setImage($newFilename);
-                } catch (FileException $e) {
-                    // Gérer l'erreur si quelque chose se passe pendant l'upload
-                }
-            }
-
             $entityManager->persist($item);
             $entityManager->flush();
 
@@ -76,8 +56,14 @@ class ItemController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_item_show', methods: ['GET'])]
-    public function show(Item $item): Response
+    public function show(string $id, ItemRepository $itemRepository): Response
     {
+        $item = $itemRepository->find($id);
+        
+        if (!$item) {
+            throw $this->createNotFoundException('L\'article demandé n\'existe pas.');
+        }
+        
         if ($item->getInventory()->getOwner() !== $this->getUser()) {
             throw $this->createAccessDeniedException();
         }
@@ -88,8 +74,14 @@ class ItemController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_item_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Item $item, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
+    public function edit(Request $request, string $id, EntityManagerInterface $entityManager, ItemRepository $itemRepository): Response
     {
+        $item = $itemRepository->find($id);
+        
+        if (!$item) {
+            throw $this->createNotFoundException('L\'article demandé n\'existe pas.');
+        }
+        
         if ($item->getInventory()->getOwner() !== $this->getUser()) {
             throw $this->createAccessDeniedException();
         }
@@ -100,34 +92,6 @@ class ItemController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Gestion de l'upload d'image
-            $imageFile = $form->get('imageFile')->getData();
-            if ($imageFile) {
-                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
-                $safeFilename = $slugger->slug($originalFilename);
-                $newFilename = $safeFilename.'-'.uniqid('', true).'.'.$imageFile->guessExtension();
-
-                try {
-                    $imageFile->move(
-                        $this->getParameter('items_directory'),
-                        $newFilename
-                    );
-                    
-                    // Supprimer l'ancienne image si elle existe
-                    $oldFilename = $item->getImage();
-                    if ($oldFilename) {
-                        $oldFilePath = $this->getParameter('items_directory').'/'.$oldFilename;
-                        if (file_exists($oldFilePath)) {
-                            unlink($oldFilePath);
-                        }
-                    }
-                    
-                    $item->setImage($newFilename);
-                } catch (FileException $e) {
-                    // Gérer l'erreur si quelque chose se passe pendant l'upload
-                }
-            }
-
             $item->setUpdatedAt(new \DateTime());
             $entityManager->flush();
 
@@ -141,38 +105,38 @@ class ItemController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_item_delete', methods: ['POST'])]
-    public function delete(Request $request, Item $item, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, string $id, EntityManagerInterface $entityManager, ItemRepository $itemRepository): Response
     {
+        $item = $itemRepository->find($id);
+        
+        if (!$item) {
+            $this->addFlash('error', 'L\'article demandé n\'existe pas.');
+            return $this->redirectToRoute('app_inventory_index');
+        }
+        
+        $inventoryId = $item->getInventory()->getId();
+        
         if ($item->getInventory()->getOwner() !== $this->getUser()) {
-            throw $this->createAccessDeniedException();
+            $this->addFlash('error', 'Vous n\'avez pas les droits pour supprimer cet article.');
+            return $this->redirectToRoute('app_inventory_show', ['id' => $inventoryId]);
         }
 
         if ($this->isCsrfTokenValid('delete'.$item->getId(), $request->request->get('_token'))) {
-            $inventoryId = $item->getInventory()->getId();
-            
-            // Supprimer l'image si elle existe
-            $filename = $item->getImage();
-            if ($filename) {
-                $filePath = $this->getParameter('items_directory').'/'.$filename;
-                if (file_exists($filePath)) {
-                    unlink($filePath);
-                }
+            try {
+                $entityManager->remove($item);
+                $entityManager->flush();
+                
+                $this->addFlash('success', 'L\'article a été supprimé avec succès.');
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Une erreur est survenue lors de la suppression de l\'article.');
             }
-            
-            $entityManager->remove($item);
-            $entityManager->flush();
             
             return $this->redirectToRoute('app_inventory_show', ['id' => $inventoryId]);
         }
 
-        return $this->redirectToRoute('app_item_show', ['id' => $item->getId()]);
+        $this->addFlash('error', 'Token CSRF invalide.');
+        return $this->redirectToRoute('app_inventory_show', ['id' => $inventoryId]);
     }
     
-    #[Route('/expiring-soon', name: 'app_item_expiring_soon', methods: ['GET'])]
-    public function expiringSoon(ItemRepository $itemRepository): Response
-    {
-        return $this->render('item/expiring_soon.html.twig', [
-            'items' => $itemRepository->findItemsExpiringSoonByUser($this->getUser()),
-        ]);
-    }
+
 }
