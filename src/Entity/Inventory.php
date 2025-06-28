@@ -28,17 +28,9 @@ class Inventory
     #[ORM\OneToMany(mappedBy: 'inventory', targetEntity: Item::class, orphanRemoval: true)]
     private Collection $items;
 
-    #[ORM\OneToMany(mappedBy: 'inventory', targetEntity: Category::class, orphanRemoval: true)]
-    private Collection $categories;
-
-    #[ORM\OneToMany(mappedBy: 'inventory', targetEntity: Location::class, orphanRemoval: true)]
-    private Collection $locations;
-
     public function __construct()
     {
         $this->items = new ArrayCollection();
-        $this->categories = new ArrayCollection();
-        $this->locations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -106,66 +98,6 @@ class Inventory
             // set the owning side to null (unless already changed)
             if ($item->getInventory() === $this) {
                 $item->setInventory(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Category>
-     */
-    public function getCategories(): Collection
-    {
-        return $this->categories;
-    }
-
-    public function addCategory(Category $category): static
-    {
-        if (!$this->categories->contains($category)) {
-            $this->categories->add($category);
-            $category->setInventory($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCategory(Category $category): static
-    {
-        if ($this->categories->removeElement($category)) {
-            // set the owning side to null (unless already changed)
-            if ($category->getInventory() === $this) {
-                $category->setInventory(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Location>
-     */
-    public function getLocations(): Collection
-    {
-        return $this->locations;
-    }
-
-    public function addLocation(Location $location): static
-    {
-        if (!$this->locations->contains($location)) {
-            $this->locations->add($location);
-            $location->setInventory($this);
-        }
-
-        return $this;
-    }
-
-    public function removeLocation(Location $location): static
-    {
-        if ($this->locations->removeElement($location)) {
-            // set the owning side to null (unless already changed)
-            if ($location->getInventory() === $this) {
-                $location->setInventory(null);
             }
         }
 

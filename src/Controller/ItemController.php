@@ -36,9 +36,7 @@ class ItemController extends AbstractController
         
         $item = new Item();
         $item->setInventory($inventory);
-        $form = $this->createForm(ItemType::class, $item, [
-            'inventory' => $inventory,
-        ]);
+        $form = $this->createForm(ItemType::class, $item);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -86,9 +84,7 @@ class ItemController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        $form = $this->createForm(ItemType::class, $item, [
-            'inventory' => $item->getInventory(),
-        ]);
+        $form = $this->createForm(ItemType::class, $item);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

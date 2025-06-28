@@ -21,23 +21,15 @@ class LocationController extends AbstractController
     public function index(LocationRepository $locationRepository, #[CurrentUser] $user): Response
     {
         return $this->render('location/index.html.twig', [
-            'locations' => $locationRepository->findByUser($user),
+            'locations' => $locationRepository->findBy(['user' => $user], ['name' => 'ASC']),
         ]);
     }
 
     #[Route('/new', name: 'app_location_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
-        // Récupérer un inventaire de l'utilisateur actuel
-        $inventory = $entityManager->getRepository(\App\Entity\Inventory::class)->findOneBy(['owner' => $this->getUser()]);
-        
-        if (!$inventory) {
-            $this->addFlash('error', 'Vous devez créer un inventaire avant de pouvoir ajouter un emplacement.');
-            return $this->redirectToRoute('app_inventory_new');
-        }
-        
         $location = new Location();
-        $location->setInventory($inventory);
+        $location->setUser($this->getUser());
         $form = $this->createForm(LocationType::class, $location);
         $form->handleRequest($request);
 
@@ -58,7 +50,7 @@ class LocationController extends AbstractController
     #[Route('/{id}/edit', name: 'app_location_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Location $location, EntityManagerInterface $entityManager): Response
     {
-        if ($location->getInventory()->getOwner() !== $this->getUser()) {
+        if ($location->getUser() !== $this->getUser()) {
             throw $this->createAccessDeniedException('Vous n\'avez pas accès à cet emplacement.');
         }
 
@@ -81,7 +73,7 @@ class LocationController extends AbstractController
     #[Route('/{id}', name: 'app_location_delete', methods: ['POST'])]
     public function delete(Request $request, Location $location, EntityManagerInterface $entityManager): Response
     {
-        if ($location->getInventory()->getOwner() !== $this->getUser()) {
+        if ($location->getUser() !== $this->getUser()) {
             $this->addFlash('error', 'Vous n\'avez pas accès à cet emplacement.');
             return $this->redirectToRoute('app_location_index');
         }

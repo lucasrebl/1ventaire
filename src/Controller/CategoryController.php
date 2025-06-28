@@ -20,23 +20,15 @@ class CategoryController extends AbstractController
     public function index(CategoryRepository $categoryRepository): Response
     {
         return $this->render('category/index.html.twig', [
-            'categories' => $categoryRepository->findByOwner($this->getUser()),
+            'categories' => $categoryRepository->findBy(['user' => $this->getUser()], ['name' => 'ASC']),
         ]);
     }
 
     #[Route('/new', name: 'app_category_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
-        // Récupérer un inventaire de l'utilisateur actuel
-        $inventory = $entityManager->getRepository(\App\Entity\Inventory::class)->findOneBy(['owner' => $this->getUser()]);
-        
-        if (!$inventory) {
-            $this->addFlash('error', 'Vous devez créer un inventaire avant de pouvoir ajouter une catégorie.');
-            return $this->redirectToRoute('app_inventory_new');
-        }
-        
         $category = new Category();
-        $category->setInventory($inventory);
+        $category->setUser($this->getUser());
         $form = $this->createForm(CategoryType::class, $category);
         $form->handleRequest($request);
 
@@ -57,7 +49,7 @@ class CategoryController extends AbstractController
     #[Route('/{id}/edit', name: 'app_category_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Category $category, EntityManagerInterface $entityManager): Response
     {
-        if ($category->getInventory()->getOwner() !== $this->getUser()) {
+        if ($category->getUser() !== $this->getUser()) {
             throw $this->createAccessDeniedException('Vous n\'avez pas accès à cette catégorie.');
         }
 
@@ -80,7 +72,7 @@ class CategoryController extends AbstractController
     #[Route('/{id}', name: 'app_category_delete', methods: ['POST'])]
     public function delete(Request $request, Category $category, EntityManagerInterface $entityManager): Response
     {
-        if ($category->getInventory()->getOwner() !== $this->getUser()) {
+        if ($category->getUser() !== $this->getUser()) {
             $this->addFlash('error', 'Vous n\'avez pas accès à cette catégorie.');
             return $this->redirectToRoute('app_category_index');
         }

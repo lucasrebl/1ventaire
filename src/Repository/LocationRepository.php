@@ -24,12 +24,6 @@ class LocationRepository extends ServiceEntityRepository
 
     public function findByUser(User $user): array
     {
-        $qb = $this->createQueryBuilder('l');
-        $qb->join('l.inventory', 'inventory')
-            ->join('inventory.owner', 'user')
-            ->where('user = :user')
-            ->setParameter('user', $user);
-
-        return $qb->getQuery()->getResult();
+        return $this->findBy(['user' => $user], ['name' => 'ASC']);
     }
 }

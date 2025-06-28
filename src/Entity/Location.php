@@ -23,7 +23,7 @@ class Location
 
     #[ORM\ManyToOne(inversedBy: 'locations')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Inventory $inventory = null;
+    private ?User $user = null;
 
     #[ORM\OneToMany(mappedBy: 'location', targetEntity: Item::class)]
     private Collection $items;
@@ -62,14 +62,14 @@ class Location
         return $this;
     }
 
-    public function getInventory(): ?Inventory
+    public function getUser(): ?User
     {
-        return $this->inventory;
+        return $this->user;
     }
 
-    public function setInventory(?Inventory $inventory): static
+    public function setUser(?User $user): static
     {
-        $this->inventory = $inventory;
+        $this->user = $user;
 
         return $this;
     }

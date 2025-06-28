@@ -14,13 +14,21 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
 class ItemType extends AbstractType
 {
+    private $tokenStorage;
+
+    public function __construct(TokenStorageInterface $tokenStorage)
+    {
+        $this->tokenStorage = $tokenStorage;
+    }
+    
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $inventory = $options['inventory'];
+        $user = $this->tokenStorage->getToken()->getUser();
         
         $builder
             ->add('name', TextType::class, [
@@ -56,10 +64,11 @@ class ItemType extends AbstractType
                 'label' => 'Catégorie',
                 'required' => false,
                 'choice_label' => 'name',
-                'query_builder' => function (EntityRepository $er) use ($inventory) {
+                'query_builder' => function (EntityRepository $er) use ($user) {
                     return $er->createQueryBuilder('c')
-                        ->where('c.inventory = :inventory')
-                        ->setParameter('inventory', $inventory);
+                        ->where('c.user = :user')
+                        ->setParameter('user', $user)
+                        ->orderBy('c.name', 'ASC');
                 },
             ])
             ->add('location', EntityType::class, [
@@ -67,10 +76,11 @@ class ItemType extends AbstractType
                 'label' => 'Emplacement',
                 'required' => false,
                 'choice_label' => 'name',
-                'query_builder' => function (EntityRepository $er) use ($inventory) {
+                'query_builder' => function (EntityRepository $er) use ($user) {
                     return $er->createQueryBuilder('l')
-                        ->where('l.inventory = :inventory')
-                        ->setParameter('inventory', $inventory);
+                        ->where('l.user = :user')
+                        ->setParameter('user', $user)
+                        ->orderBy('l.name', 'ASC');
                 },
             ])
         ;
@@ -80,9 +90,6 @@ class ItemType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Item::class,
-            'inventory' => null,
         ]);
-        
-        $resolver->setRequired('inventory');
     }
 }
