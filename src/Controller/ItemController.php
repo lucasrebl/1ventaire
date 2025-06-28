@@ -138,5 +138,33 @@ class ItemController extends AbstractController
         return $this->redirectToRoute('app_inventory_show', ['id' => $inventoryId]);
     }
     
-
+    #[Route('/delete-expired', name: 'app_item_delete_expired')]
+    public function deleteExpired(Request $request, EntityManagerInterface $entityManager, ItemRepository $itemRepository): Response
+    {
+        // Vérifier que l'utilisateur est connecté
+        if (!$this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
+        
+        if ($this->isCsrfTokenValid('delete_expired', $request->request->get('_token'))) {
+            // Récupérer tous les articles expirés de l'utilisateur
+            $expiredItems = $itemRepository->findExpiredItems($this->getUser());
+            
+            $count = count($expiredItems);
+            if ($count > 0) {
+                foreach ($expiredItems as $item) {
+                    $entityManager->remove($item);
+                }
+                
+                $entityManager->flush();
+                $this->addFlash('success', "$count article(s) expiré(s) supprimé(s) avec succès.");
+            } else {
+                $this->addFlash('info', 'Aucun article expiré à supprimer.');
+            }
+        } else {
+            $this->addFlash('error', 'Token CSRF invalide.');
+        }
+        
+        return $this->redirectToRoute('app_home');
+    }
 }
