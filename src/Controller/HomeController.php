@@ -20,10 +20,14 @@ class HomeController extends AbstractController
             $expiringItems = $itemRepository->findItemsExpiringSoon($this->getUser(), 30, 5);
             $expiredItems = $itemRepository->findExpiredItems($this->getUser(), 10); // Limit to 10 items
             
+            // Récupérer les inventaires partagés avec l'utilisateur
+            $sharedInventories = $inventoryRepository->findSharedWithUser($this->getUser());
+            
             return $this->render('home/authenticated.html.twig', [
                 'recentInventories' => $recentInventories,
                 'expiringItems' => $expiringItems,
                 'expiredItems' => $expiredItems,
+                'sharedInventories' => $sharedInventories,
             ]);
         }
         

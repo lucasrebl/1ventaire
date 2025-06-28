@@ -61,6 +61,9 @@
         .expired-items-section .section-header {
             border-bottom-color: rgba(220, 53, 69, 0.3);
         }
+        .shared-inventory-card {
+            border-left: 4px solid #6f42c1;
+        }
     </style>
 {% endblock %}
 
@@ -164,6 +167,55 @@
             {% endif %}
         </div>
     </section>
+    
+    <!-- Shared Inventories Section -->
+    {% if sharedInventories is defined and sharedInventories is not empty %}
+    <section class="mb-5">
+        <div class="d-flex justify-content-between align-items-center section-header">
+            <h2>Inventaires partagés avec vous</h2>
+        </div>
+        
+        <div class="row">
+            {% for inventory in sharedInventories %}
+                <div class="col-md-4">
+                    <div class="card inventory-card shared-inventory-card">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                {{ inventory.name }}
+                                <span class="badge bg-purple float-end">Partagé</span>
+                            </h5>
+                            <p class="card-text text-muted">
+                                {{ inventory.description|default('Aucune description')|length > 100 ? inventory.description|slice(0, 100) ~ '...' : inventory.description|default('Aucune description') }}
+                            </p>
+                            <p class="card-text"><small class="text-muted">Par: {{ inventory.owner.firstName }} {{ inventory.owner.lastName }}</small></p>
+                            <div class="d-flex align-items-center">
+                                <span class="me-3"><i class="bi bi-box me-1"></i> {{ inventory.items|length }} articles</span>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white">
+                            <a href="{{ path('app_inventory_show', {'id': inventory.id}) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye me-1"></i>Voir
+                            </a>
+                            
+                            {% set sharedAccess = null %}
+                            {% for shared in inventory.sharedInventories %}
+                                {% if shared.sharedWith.id == app.user.id %}
+                                    {% set sharedAccess = shared %}
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if sharedAccess and sharedAccess.accessLevel in ['edit', 'admin'] %}
+                                <a href="{{ path('app_item_new', {'inventory_id': inventory.id}) }}" class="btn btn-sm btn-outline-success ms-1">
+                                    <i class="bi bi-plus-circle me-1"></i>Ajouter un article
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
     
     <!-- Expiring Items Section -->
     <section class="mb-5">
@@ -356,4 +408,31 @@
         </div>
     </section>
 </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+            
+            // Delete confirmation logic
+            var deleteButtons = document.querySelectorAll('[data-delete-form]');
+            deleteButtons.forEach(function(button) {
+                button.addEventListener('click', function() {
+                    var formId = this.getAttribute('data-delete-form');
+                    var message = this.getAttribute('data-delete-message');
+                    
+                    if (confirm(message)) {
+                        document.getElementById(formId).submit();
+                    }
+                });
+            });
+        });
+    </script>
 {% endblock %}

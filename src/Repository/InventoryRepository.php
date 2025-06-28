@@ -35,4 +35,18 @@ class InventoryRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+    
+    /**
+     * Find all inventories shared with a user
+     */
+    public function findSharedWithUser(User $user): array
+    {
+        return $this->createQueryBuilder('i')
+            ->join('i.sharedInventories', 'si')
+            ->andWhere('si.sharedWith = :user')
+            ->setParameter('user', $user)
+            ->orderBy('i.name', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

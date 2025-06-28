@@ -28,9 +28,13 @@ class Inventory
     #[ORM\OneToMany(mappedBy: 'inventory', targetEntity: Item::class, orphanRemoval: true)]
     private Collection $items;
 
+    #[ORM\OneToMany(mappedBy: 'inventory', targetEntity: SharedInventory::class, orphanRemoval: true)]
+    private Collection $sharedInventories;
+
     public function __construct()
     {
         $this->items = new ArrayCollection();
+        $this->sharedInventories = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -98,6 +102,36 @@ class Inventory
             // set the owning side to null (unless already changed)
             if ($item->getInventory() === $this) {
                 $item->setInventory(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, SharedInventory>
+     */
+    public function getSharedInventories(): Collection
+    {
+        return $this->sharedInventories;
+    }
+
+    public function addSharedInventory(SharedInventory $sharedInventory): static
+    {
+        if (!$this->sharedInventories->contains($sharedInventory)) {
+            $this->sharedInventories->add($sharedInventory);
+            $sharedInventory->setInventory($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSharedInventory(SharedInventory $sharedInventory): static
+    {
+        if ($this->sharedInventories->removeElement($sharedInventory)) {
+            // set the owning side to null (unless already changed)
+            if ($sharedInventory->getInventory() === $this) {
+                $sharedInventory->setInventory(null);
             }
         }
 

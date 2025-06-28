@@ -100,6 +100,43 @@
             </div>
         {% endfor %}
     </div>
+
+    {% if shared_inventories|length > 0 %}
+        <h2 class="mt-5 mb-4">Inventaires partagés avec moi</h2>
+        <div class="row">
+        {% for shared in shared_inventories %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-info bg-opacity-25 d-flex justify-content-between align-items-center">
+                        <span>Partagé par {{ shared.inventory.owner.firstName }}</span>
+                        {% if shared.accessLevel == 'view' %}
+                            <span class="badge bg-info">Lecture uniquement</span>
+                        {% elseif shared.accessLevel == 'edit' %}
+                            <span class="badge bg-warning">Lecture et modification</span>
+                        {% elseif shared.accessLevel == 'admin' %}
+                            <span class="badge bg-danger">Tous les droits</span>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ shared.inventory.name }}</h5>
+                        <p class="card-text">{{ shared.inventory.description|default('Aucune description') }}</p>
+                        <p class="text-muted">{{ shared.inventory.items|length }} articles</p>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                        <a href="{{ path('app_inventory_show', {'id': shared.inventory.id}) }}" class="btn btn-info">
+                            <i class="bi bi-eye me-1"></i>Voir
+                        </a>
+                        {% if shared.accessLevel == 'edit' or shared.accessLevel == 'admin' %}
+                            <a href="{{ path('app_inventory_edit', {'id': shared.inventory.id}) }}" class="btn btn-secondary ms-2">
+                                <i class="bi bi-pencil me-1"></i>Modifier
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+    {% endif %}
 </div>
 {% endblock %}
 

@@ -2,14 +2,14 @@
 
 namespace App\Security;
 
-use App\Entity\Inventory;
+use App\Entity\Item;
 use App\Entity\SharedInventory;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
-class InventoryVoter extends Voter
+class ItemVoter extends Voter
 {
     const VIEW = 'view';
     const EDIT = 'edit';
@@ -28,7 +28,7 @@ class InventoryVoter extends Voter
             return false;
         }
 
-        if (!$subject instanceof Inventory) {
+        if (!$subject instanceof Item) {
             return false;
         }
 
@@ -44,44 +44,44 @@ class InventoryVoter extends Voter
             return false;
         }
 
-        /** @var Inventory $inventory */
-        $inventory = $subject;
+        /** @var Item $item */
+        $item = $subject;
 
         return match($attribute) {
-            self::VIEW => $this->canView($inventory, $user),
-            self::EDIT => $this->canEdit($inventory, $user),
-            self::DELETE => $this->canDelete($inventory, $user),
+            self::VIEW => $this->canView($item, $user),
+            self::EDIT => $this->canEdit($item, $user),
+            self::DELETE => $this->canDelete($item, $user),
             default => throw new \LogicException('This code should not be reached!')
         };
     }
 
-    private function canView(Inventory $inventory, User $user): bool
+    private function canView(Item $item, User $user): bool
     {
-        // Si l'utilisateur est le propriétaire, il peut voir
-        if ($user === $inventory->getOwner()) {
+        // Si l'utilisateur est le propriétaire de l'inventaire, il peut voir l'article
+        if ($user === $item->getInventory()->getOwner()) {
             return true;
         }
 
         // Vérifie si l'inventaire est partagé avec l'utilisateur
         $sharedInventory = $this->entityManager->getRepository(SharedInventory::class)->findOneBy([
-            'inventory' => $inventory,
+            'inventory' => $item->getInventory(),
             'sharedWith' => $user
         ]);
 
-        // Si l'inventaire est partagé avec l'utilisateur, il peut le voir
+        // Si l'inventaire est partagé avec l'utilisateur, il peut voir l'article
         return $sharedInventory !== null;
     }
 
-    private function canEdit(Inventory $inventory, User $user): bool
+    private function canEdit(Item $item, User $user): bool
     {
-        // Si l'utilisateur est le propriétaire, il peut modifier
-        if ($user === $inventory->getOwner()) {
+        // Si l'utilisateur est le propriétaire de l'inventaire, il peut modifier l'article
+        if ($user === $item->getInventory()->getOwner()) {
             return true;
         }
 
         // Vérifie si l'inventaire est partagé avec l'utilisateur avec des droits d'édition
         $sharedInventory = $this->entityManager->getRepository(SharedInventory::class)->findOneBy([
-            'inventory' => $inventory,
+            'inventory' => $item->getInventory(),
             'sharedWith' => $user
         ]);
 
@@ -89,20 +89,20 @@ class InventoryVoter extends Voter
             return false;
         }
 
-        // L'utilisateur peut modifier si le niveau d'accès est 'edit' ou 'admin'
+        // L'utilisateur peut modifier l'article si le niveau d'accès est 'edit' ou 'admin'
         return in_array($sharedInventory->getAccessLevel(), ['edit', 'admin']);
     }
 
-    private function canDelete(Inventory $inventory, User $user): bool
+    private function canDelete(Item $item, User $user): bool
     {
-        // Si l'utilisateur est le propriétaire, il peut supprimer
-        if ($user === $inventory->getOwner()) {
+        // Si l'utilisateur est le propriétaire de l'inventaire, il peut supprimer l'article
+        if ($user === $item->getInventory()->getOwner()) {
             return true;
         }
 
         // Vérifie si l'inventaire est partagé avec l'utilisateur avec des droits admin
         $sharedInventory = $this->entityManager->getRepository(SharedInventory::class)->findOneBy([
-            'inventory' => $inventory,
+            'inventory' => $item->getInventory(),
             'sharedWith' => $user
         ]);
 
@@ -110,7 +110,7 @@ class InventoryVoter extends Voter
             return false;
         }
 
-        // L'utilisateur peut supprimer seulement si le niveau d'accès est 'admin'
+        // L'utilisateur peut supprimer l'article seulement si le niveau d'accès est 'admin'
         return $sharedInventory->getAccessLevel() === 'admin';
     }
 }

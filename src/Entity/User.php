@@ -31,22 +31,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $firstName = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $lastName = null;
-
-    #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Inventory::class, orphanRemoval: true)]
+    private ?string $lastName = null;    #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Inventory::class, orphanRemoval: true)]
     private Collection $inventories;
-
+    
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Category::class, orphanRemoval: true)]
     private Collection $categories;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Location::class, orphanRemoval: true)]
     private Collection $locations;
+    
+    #[ORM\OneToMany(mappedBy: 'sharedWith', targetEntity: SharedInventory::class, orphanRemoval: true)]
+    private Collection $sharedWithMe;
 
     public function __construct()
     {
         $this->inventories = new ArrayCollection();
         $this->categories = new ArrayCollection();
         $this->locations = new ArrayCollection();
+        $this->sharedWithMe = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -227,6 +229,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($location->getUser() === $this) {
                 $location->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, SharedInventory>
+     */
+    public function getSharedWithMe(): Collection
+    {
+        return $this->sharedWithMe;
+    }
+
+    public function addSharedWithMe(SharedInventory $sharedInventory): static
+    {
+        if (!$this->sharedWithMe->contains($sharedInventory)) {
+            $this->sharedWithMe->add($sharedInventory);
+            $sharedInventory->setSharedWith($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSharedWithMe(SharedInventory $sharedInventory): static
+    {
+        if ($this->sharedWithMe->removeElement($sharedInventory)) {
+            // set the owning side to null (unless already changed)
+            if ($sharedInventory->getSharedWith() === $this) {
+                $sharedInventory->setSharedWith(null);
             }
         }
 

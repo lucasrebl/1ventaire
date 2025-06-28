@@ -62,12 +62,31 @@ class ItemController extends AbstractController
             throw $this->createNotFoundException('L\'article demandé n\'existe pas.');
         }
         
-        if ($item->getInventory()->getOwner() !== $this->getUser()) {
-            throw $this->createAccessDeniedException();
+        try {
+            $this->denyAccessUnlessGranted('view', $item);
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'Vous n\'avez pas les droits nécessaires pour voir cet article.');
+            return $this->redirectToRoute('app_inventory_show', ['id' => $item->getInventory()->getId()]);
+        }
+        
+        // Récupérer les droits d'accès pour les passer au template
+        $canEdit = $this->isGranted('edit', $item);
+        $canDelete = $this->isGranted('delete', $item);
+        
+        // Préparer les messages selon les droits
+        $messages = [];
+        if (!$canEdit) {
+            $messages['edit'] = 'Vous n\'avez pas les droits nécessaires pour modifier cet article.';
+        }
+        if (!$canDelete) {
+            $messages['delete'] = 'Vous n\'avez pas les droits nécessaires pour supprimer cet article.';
         }
 
         return $this->render('item/show.html.twig', [
             'item' => $item,
+            'can_edit' => $canEdit,
+            'can_delete' => $canDelete,
+            'permission_messages' => $messages,
         ]);
     }
 
@@ -80,8 +99,11 @@ class ItemController extends AbstractController
             throw $this->createNotFoundException('L\'article demandé n\'existe pas.');
         }
         
-        if ($item->getInventory()->getOwner() !== $this->getUser()) {
-            throw $this->createAccessDeniedException();
+        try {
+            $this->denyAccessUnlessGranted('edit', $item);
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'Vous n\'avez pas les droits nécessaires pour modifier cet article.');
+            return $this->redirectToRoute('app_item_show', ['id' => $item->getId()]);
         }
 
         $form = $this->createForm(ItemType::class, $item);
@@ -112,7 +134,7 @@ class ItemController extends AbstractController
         
         $inventoryId = $item->getInventory()->getId();
         
-        if ($item->getInventory()->getOwner() !== $this->getUser()) {
+        if (!$this->isGranted('delete', $item)) {
             $this->addFlash('error', 'Vous n\'avez pas les droits pour supprimer cet article.');
             return $this->redirectToRoute('app_inventory_show', ['id' => $inventoryId]);
         }

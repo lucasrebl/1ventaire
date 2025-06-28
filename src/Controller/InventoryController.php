@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Inventory;
 use App\Form\InventoryType;
 use App\Repository\InventoryRepository;
+use App\Repository\SharedInventoryRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,12 +18,14 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class InventoryController extends AbstractController
 {
     #[Route('/', name: 'app_inventory_index', methods: ['GET'])]
-    public function index(InventoryRepository $inventoryRepository): Response
+    public function index(InventoryRepository $inventoryRepository, SharedInventoryRepository $sharedInventoryRepository): Response
     {
         $user = $this->getUser();
+        $sharedWithMe = $sharedInventoryRepository->findSharedWithUser($user);
 
         return $this->render('inventory/index.html.twig', [
             'inventories' => $inventoryRepository->findBy(['owner' => $user]),
+            'shared_inventories' => $sharedWithMe,
         ]);
     }
 
