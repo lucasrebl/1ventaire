@@ -16,6 +16,9 @@ return [
         'path' => './assets/app.js',
         'entrypoint' => true,
     ],
+    './js/dropdown.js' => [
+        'path' => './assets/js/dropdown.js',
+    ],
     '@hotwired/stimulus' => [
         'version' => '3.2.2',
     ],

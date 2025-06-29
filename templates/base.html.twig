@@ -36,6 +36,24 @@
         <!-- Load Bootstrap JS before our custom scripts -->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
         
+        <!-- Initialize Bootstrap dropdowns explicitly -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Initialiser les dropdowns manuellement après chargement de Bootstrap
+                setTimeout(function() {
+                    var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
+                    dropdownElementList.forEach(function(dropdownToggleEl) {
+                        try {
+                            new bootstrap.Dropdown(dropdownToggleEl);
+                        } catch (error) {
+                            console.error('Erreur lors de l\'initialisation du dropdown:', error);
+                        }
+                    });
+                    console.log('Dropdowns Bootstrap réinitialisés');
+                }, 300);
+            });
+        </script>
+        
         <!-- Custom delete functionality -->
         <script>
             (function() {
