@@ -159,7 +159,8 @@
                                                        data-bs-toggle="modal" 
                                                        data-bs-target="#deleteShareModal" 
                                                        data-share-id="{{ shared.id }}"
-                                                       data-share-user="{{ shared.sharedWith.firstName }} {{ shared.sharedWith.lastName }}">
+                                                       data-share-user="{{ shared.sharedWith.firstName }} {{ shared.sharedWith.lastName }}"
+                                                       data-share-token="{{ csrf_token('delete' ~ shared.id) }}">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
                                             {% else %}
@@ -238,7 +239,8 @@
                                            data-bs-toggle="modal" 
                                            data-bs-target="#deleteItemModal" 
                                            data-item-id="{{ item.id }}"
-                                           data-item-name="{{ item.name }}">
+                                           data-item-name="{{ item.name }}"
+                                           data-item-token="{{ csrf_token('delete' ~ item.id) }}">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 {% else %}
@@ -321,6 +323,7 @@
                     const button = event.relatedTarget;
                     const shareId = button.getAttribute('data-share-id');
                     const shareUser = button.getAttribute('data-share-user');
+                    const shareToken = button.getAttribute('data-share-token');
                     
                     // Mise à jour des informations du modal
                     document.getElementById('shareUserName').textContent = shareUser;
@@ -328,7 +331,7 @@
                     // Mise à jour du formulaire de suppression
                     const form = document.getElementById('deleteShareForm');
                     form.action = "{{ path('app_shared_inventory_remove', {'id': 'SHARE_ID'}) }}".replace('SHARE_ID', shareId);
-                    document.getElementById('shareToken').value = "{{ csrf_token('delete') }}".slice(0, -1) + shareId;
+                    document.getElementById('shareToken').value = shareToken;
                 });
             }
             
@@ -339,6 +342,7 @@
                     const button = event.relatedTarget;
                     const itemId = button.getAttribute('data-item-id');
                     const itemName = button.getAttribute('data-item-name');
+                    const itemToken = button.getAttribute('data-item-token');
                     
                     // Mise à jour des informations du modal
                     document.getElementById('itemName').textContent = itemName;
@@ -346,7 +350,7 @@
                     // Mise à jour du formulaire de suppression
                     const form = document.getElementById('deleteItemForm');
                     form.action = "{{ path('app_item_delete', {'id': 'ITEM_ID'}) }}".replace('ITEM_ID', itemId);
-                    document.getElementById('itemToken').value = "{{ csrf_token('delete') }}".slice(0, -1) + itemId;
+                    document.getElementById('itemToken').value = itemToken;
                 });
             }
         });

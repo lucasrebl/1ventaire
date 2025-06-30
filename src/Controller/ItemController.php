@@ -152,12 +152,26 @@ class ItemController extends AbstractController
 
         if ($this->isCsrfTokenValid('delete'.$item->getId(), $request->request->get('_token'))) {
             try {
+                // Vérifier quel type d'objet nous supprimons
+                $this->addFlash('info', 'Tentative de suppression de l\'article ID: ' . $item->getId() . ' de type: ' . get_class($item));
+                
+                // Vérifier l'inventaire parent
+                $inventory = $item->getInventory();
+                $this->addFlash('info', 'Article appartenant à l\'inventaire: ' . $inventory->getName() . ' (ID: ' . $inventory->getId() . ')');
+                
+                // Supprimer l'article
                 $entityManager->remove($item);
                 $entityManager->flush();
                 
                 $this->addFlash('success', 'L\'article a été supprimé avec succès.');
             } catch (\Exception $e) {
-                $this->addFlash('error', 'Une erreur est survenue lors de la suppression de l\'article.');
+                // Log détaillé de l'erreur
+                $this->addFlash('error', 'Erreur: ' . $e->getMessage());
+                
+                // Afficher la trace pour le débogage
+                $trace = $e->getTraceAsString();
+                $shortTrace = substr($trace, 0, 500) . (strlen($trace) > 500 ? '...' : '');
+                $this->addFlash('error', 'Détails: ' . $shortTrace);
             }
             
             return $this->redirectToRoute('app_inventory_show', ['id' => $inventoryId]);
