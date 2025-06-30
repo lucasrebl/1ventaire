@@ -71,16 +71,16 @@
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-6">
-                <h1>Simplifiez la gestion de vos biens domestiques</h1>
-                <p class="lead">1ventaire vous aide à suivre, organiser et optimiser tous vos biens, des aliments aux vêtements, en passant par les objets du quotidien.</p>
+                <h1>Organisez et partagez vos inventaires simplement</h1>
+                <p class="lead">1ventaire est votre solution complète pour gérer tous vos inventaires, suivre les dates de péremption et partager vos collections avec vos proches.</p>
                 <div class="mt-4">
-                    <a href="{{ path('app_register') }}" class="btn btn-primary btn-lg me-2">Essayer gratuitement</a>
-                    <a href="#features" class="btn btn-outline-secondary btn-lg">En savoir plus</a>
+                    <a href="{{ path('app_register') }}" class="btn btn-primary btn-lg me-2">Créer un compte gratuit</a>
+                    <a href="#features" class="btn btn-outline-secondary btn-lg">Découvrir les fonctionnalités</a>
                 </div>
             </div>
-            <div class="col-lg-6">
-                <img src="https://via.placeholder.com/600x400" alt="1ventaire App" class="img-fluid rounded">
-            </div>
+            {# <div class="col-lg-6">
+                <img src="{{ asset('uploads/home-inventory-dashboard.jpg') }}" alt="1ventaire Dashboard" class="img-fluid rounded shadow">
+            </div> #}
         </div>
     </div>
 </section>
@@ -91,23 +91,46 @@
         <div class="row">
             <div class="col-md-4">
                 <div class="feature-card">
-                    <div class="feature-icon">📱</div>
-                    <h3>Scan des codes-barres</h3>
-                    <p>Ajoutez facilement des articles à votre inventaire en scannant simplement leur code-barre ou QR code.</p>
+                    <div class="feature-icon">�</div>
+                    <h3>Gestion d'inventaires</h3>
+                    <p>Créez et gérez plusieurs inventaires pour différents besoins (cuisine, garage, collection, etc.) avec une organisation efficace.</p>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="feature-card">
                     <div class="feature-icon">🔔</div>
                     <h3>Alertes de péremption</h3>
-                    <p>Recevez des notifications avant que vos aliments n'arrivent à expiration pour réduire le gaspillage.</p>
+                    <p>Suivez les dates de péremption de vos produits et recevez des alertes pour les articles qui expirent bientôt.</p>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="feature-card">
-                    <div class="feature-icon">📊</div>
-                    <h3>Analyses détaillées</h3>
-                    <p>Obtenez des rapports sur l'utilisation de vos biens et des recommandations d'achat personnalisées.</p>
+                    <div class="feature-icon">�</div>
+                    <h3>Partage d'inventaires</h3>
+                    <p>Partagez vos inventaires avec votre famille ou vos amis pour une gestion collaborative.</p>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">📍</div>
+                    <h3>Gestion des emplacements</h3>
+                    <p>Organisez vos articles par emplacements (armoire, tiroir, étagère) pour savoir exactement où ils se trouvent.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">🏷️</div>
+                    <h3>Catégorisation</h3>
+                    <p>Classifiez vos objets par catégories personnalisables pour une recherche et une gestion facilitées.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Interface réactive</h3>
+                    <p>Accédez à votre inventaire depuis n'importe quel appareil grâce à notre interface responsive.</p>
                 </div>
             </div>
         </div>
@@ -121,22 +144,22 @@
             <div class="col-md-3 text-center">
                 <div class="mb-3">1️⃣</div>
                 <h4>Créez un compte</h4>
-                <p>Inscrivez-vous gratuitement en quelques clics</p>
+                <p>Inscrivez-vous gratuitement en quelques secondes</p>
             </div>
             <div class="col-md-3 text-center">
                 <div class="mb-3">2️⃣</div>
-                <h4>Ajoutez vos objets</h4>
-                <p>Scannez ou entrez manuellement vos articles</p>
+                <h4>Créez un inventaire</h4>
+                <p>Définissez un nom et une description pour votre nouvel inventaire</p>
             </div>
             <div class="col-md-3 text-center">
                 <div class="mb-3">3️⃣</div>
-                <h4>Organisez par catégories</h4>
-                <p>Classez vos biens par type et emplacement</p>
+                <h4>Ajoutez des objets</h4>
+                <p>Enregistrez vos articles avec leurs caractéristiques et dates d'expiration</p>
             </div>
             <div class="col-md-3 text-center">
                 <div class="mb-3">4️⃣</div>
-                <h4>Gérez efficacement</h4>
-                <p>Suivez, mettez à jour et optimisez votre inventaire</p>
+                <h4>Partagez et gérez</h4>
+                <p>Partagez votre inventaire et suivez efficacement vos articles</p>
             </div>
         </div>
     </div>
@@ -144,12 +167,15 @@
 
 <section class="py-5" id="contact">
     <div class="container">
-        <h2 class="text-center mb-5">Contact</h2>
+        <h2 class="text-center mb-5">Démarrez dès aujourd'hui</h2>
         <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-body">
-                        <p class="text-center">Pour toute question ou assistance, contactez-nous à <a href="mailto:support@1ventaire.com">support@1ventaire.com</a></p>
+            <div class="col-md-8 text-center">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-body p-5">
+                        <h3 class="mb-4">Prêt à mieux gérer vos inventaires ?</h3>
+                        <p class="lead mb-4">Rejoignez des milliers d'utilisateurs qui ont simplifié la gestion de leurs biens grâce à 1ventaire.</p>
+                        <a href="{{ path('app_register') }}" class="btn btn-primary btn-lg px-5">S'inscrire gratuitement</a>
+                        <p class="mt-3">Déjà inscrit ? <a href="{{ path('app_login') }}">Connectez-vous</a></p>
                     </div>
                 </div>
             </div>
@@ -162,10 +188,12 @@
         <div class="row">
             <div class="col-md-6">
                 <h5>1ventaire</h5>
-                <p>Simplifiez la gestion de votre foyer</p>
+                <p>Votre solution complète de gestion d'inventaires</p>
+                <p>Pour toute question : <a href="mailto:support@1ventaire.com" class="text-light">support@1ventaire.com</a></p>
             </div>
             <div class="col-md-6 text-md-end">
-                <p>&copy; 2025 1ventaire. Tous droits réservés.</p>
+                <p class="mb-2">© 2025 1ventaire. Tous droits réservés.</p>
+                <p class="small">Développé avec Symfony 7.2</p>
             </div>
         </div>
     </div>
