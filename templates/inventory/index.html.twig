@@ -1,0 +1,146 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}1ventaire - Mes inventaires{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+{% endblock %}
+
+{% block body %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+        <a class="navbar-brand" href="{{ path('app_home') }}">1ventaire</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" href="{{ path('app_inventory_index') }}">Mes inventaires</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_category_index') }}">Catégories</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_location_index') }}">Emplacements</a>
+                </li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                        {{ app.user.firstName }}
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">Mon profil</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{{ path('app_logout') }}">Déconnexion</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Mes inventaires</h1>
+        <div class="btn-group">
+            <a href="{{ path('app_inventory_new') }}" class="btn btn-primary me-2">
+                <i class="bi bi-plus-circle me-2"></i>Créer un nouvel inventaire
+            </a>
+            <a href="{{ path('app_category_new') }}" class="btn btn-success me-2">
+                <i class="bi bi-tags me-2"></i>Ajouter une catégorie
+            </a>
+            <a href="{{ path('app_location_new') }}" class="btn btn-info">
+                <i class="bi bi-geo-alt me-2"></i>Ajouter un emplacement
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        {% for inventory in inventories %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ inventory.name }}</h5>
+                        <p class="card-text">{{ inventory.description|default('Aucune description') }}</p>
+                        <p class="text-muted">{{ inventory.items|length }} articles</p>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                        <a href="{{ path('app_inventory_show', {'id': inventory.id}) }}" class="btn btn-info">
+                            <i class="bi bi-eye me-1"></i>Voir
+                        </a>
+                        <a href="{{ path('app_inventory_edit', {'id': inventory.id}) }}" class="btn btn-secondary ms-2">
+                            <i class="bi bi-pencil me-1"></i>Modifier
+                        </a>
+                        <form method="post" id="delete-form-{{ inventory.id }}" action="{{ path('app_inventory_delete', {'id': inventory.id}) }}" style="display: inline-block;">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ inventory.id) }}">
+                            <button type="button" class="btn btn-danger ms-2" data-delete-form="delete-form-{{ inventory.id }}" data-delete-message="Êtes-vous sûr de vouloir supprimer cet inventaire ?">
+                                <i class="bi bi-trash me-1"></i>Supprimer
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <p class="mb-0">Vous n'avez pas encore d'inventaire. <a href="{{ path('app_inventory_new') }}">Créez-en un</a> pour commencer à organiser vos biens.</p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% if shared_inventories|length > 0 %}
+        <h2 class="mt-5 mb-4">Inventaires partagés avec moi</h2>
+        <div class="row">
+        {% for shared in shared_inventories %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-info bg-opacity-25 d-flex justify-content-between align-items-center">
+                        <span>Partagé par {{ shared.inventory.owner.firstName }}</span>
+                        {% if shared.accessLevel == 'view' %}
+                            <span class="badge bg-info">Lecture uniquement</span>
+                        {% elseif shared.accessLevel == 'edit' %}
+                            <span class="badge bg-warning">Lecture et modification</span>
+                        {% elseif shared.accessLevel == 'admin' %}
+                            <span class="badge bg-danger">Tous les droits</span>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ shared.inventory.name }}</h5>
+                        <p class="card-text">{{ shared.inventory.description|default('Aucune description') }}</p>
+                        <p class="text-muted">{{ shared.inventory.items|length }} articles</p>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                        <a href="{{ path('app_inventory_show', {'id': shared.inventory.id}) }}" class="btn btn-info">
+                            <i class="bi bi-eye me-1"></i>Voir
+                        </a>
+                        {% if shared.accessLevel == 'edit' or shared.accessLevel == 'admin' %}
+                            <a href="{{ path('app_inventory_edit', {'id': shared.inventory.id}) }}" class="btn btn-secondary ms-2">
+                                <i class="bi bi-pencil me-1"></i>Modifier
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

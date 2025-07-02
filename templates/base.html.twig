@@ -13,5 +13,207 @@
     </head>
     <body>
         {% block body %}{% endblock %}
+        
+        <!-- Delete Confirmation Modal -->
+        <div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteConfirmationModalLabel">Confirmation de suppression</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                    </div>
+                    <div class="modal-body" id="deleteConfirmationModalBody">
+                        Êtes-vous sûr de vouloir supprimer cet élément ?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Supprimer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Load Bootstrap JS before our custom scripts -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        
+        <!-- Initialize Bootstrap dropdowns explicitly -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Initialiser les dropdowns manuellement après chargement de Bootstrap
+                setTimeout(function() {
+                    var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
+                    dropdownElementList.forEach(function(dropdownToggleEl) {
+                        try {
+                            new bootstrap.Dropdown(dropdownToggleEl);
+                        } catch (error) {
+                            console.error('Erreur lors de l\'initialisation du dropdown:', error);
+                        }
+                    });
+                    console.log('Dropdowns Bootstrap réinitialisés');
+                }, 300);
+            });
+        </script>
+        
+        <!-- Custom delete functionality -->
+        <script>
+            (function() {
+                // Simple helper function to check if Bootstrap is loaded
+                function isBootstrapLoaded() {
+                    return typeof bootstrap !== 'undefined';
+                }
+
+                // Function to initialize delete buttons
+                function initializeDeleteButtons() {
+                    console.log("Initializing delete buttons");
+                    
+                    // Get the confirmation modal
+                    const deleteModal = document.getElementById('deleteConfirmationModal');
+                    if (!deleteModal) {
+                        console.error('Delete confirmation modal not found!');
+                        return;
+                    }
+                    
+                    // Check if Bootstrap is available
+                    if (!isBootstrapLoaded()) {
+                        console.error('Bootstrap is not loaded!');
+                        // Use native confirm as fallback
+                        setupFallbackConfirmation();
+                        return;
+                    }
+                    
+                    // Initialize Bootstrap modal
+                    let deleteModalInstance;
+                    try {
+                        deleteModalInstance = new bootstrap.Modal(deleteModal);
+                    } catch (error) {
+                        console.error('Error initializing Bootstrap modal:', error);
+                        setupFallbackConfirmation();
+                        return;
+                    }
+                    
+                    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+                    const deleteModalBody = document.getElementById('deleteConfirmationModalBody');
+                    let currentFormId = null;
+                    
+                    // Set up the confirmation button click handler
+                    confirmDeleteBtn.addEventListener('click', function() {
+                        console.log('Confirm delete clicked, form ID:', currentFormId);
+                        if (currentFormId) {
+                            const form = document.getElementById(currentFormId);
+                            if (form) {
+                                console.log('Submitting form:', currentFormId);
+                                form.submit();
+                            } else {
+                                console.error('Form not found:', currentFormId);
+                                alert('Erreur: Impossible de trouver le formulaire pour cette action.');
+                            }
+                        }
+                        deleteModalInstance.hide();
+                    });
+                    
+                    // Check for delete buttons when DOM is ready
+                    const deleteButtons = document.querySelectorAll('[data-delete-form]');
+                    console.log('Found', deleteButtons.length, 'delete buttons');
+                    
+                    // Add click handler to each button directly for better reliability
+                    deleteButtons.forEach(function(button) {
+                        button.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            console.log('Delete button clicked directly');
+                            
+                            // Get the form ID and message
+                            currentFormId = this.getAttribute('data-delete-form');
+                            const message = this.getAttribute('data-delete-message');
+                            
+                            console.log('Form ID:', currentFormId);
+                            console.log('Message:', message);
+                            
+                            // Update modal content with message if provided
+                            if (message && deleteModalBody) {
+                                deleteModalBody.textContent = message;
+                            }
+                            
+                            // Show the modal
+                            try {
+                                deleteModalInstance.show();
+                            } catch (error) {
+                                console.error('Error showing modal:', error);
+                                // Fallback to confirm
+                                if (confirm(message || 'Êtes-vous sûr de vouloir supprimer cet élément?')) {
+                                    const form = document.getElementById(currentFormId);
+                                    if (form) form.submit();
+                                }
+                            }
+                        });
+                    });
+                    
+                    // Also use event delegation as a backup method
+                    document.body.addEventListener('click', function(e) {
+                        // Only handle clicks that aren't already handled by direct event listeners
+                        if (!e.target.closest('[data-delete-form]')) return;
+                        
+                        // If we reach here, it means the event wasn't handled by the direct listeners
+                        // This is just a fallback in case dynamic content is added
+                        console.log('Delete button clicked via delegation');
+                        
+                        // Get the button that was clicked
+                        const deleteButton = e.target.closest('[data-delete-form]');
+                        if (!deleteButton) return;
+                        
+                        // Prevent default action
+                        e.preventDefault();
+                        
+                        // Get the form ID and message
+                        currentFormId = deleteButton.getAttribute('data-delete-form');
+                        const message = deleteButton.getAttribute('data-delete-message');
+                        
+                        // Update modal content with message if provided
+                        if (message && deleteModalBody) {
+                            deleteModalBody.textContent = message;
+                        }
+                        
+                        // Show the modal
+                        try {
+                            deleteModalInstance.show();
+                        } catch (error) {
+                            console.error('Error showing modal:', error);
+                            // Fallback to confirm
+                            if (confirm(message || 'Êtes-vous sûr de vouloir supprimer cet élément?')) {
+                                const form = document.getElementById(currentFormId);
+                                if (form) form.submit();
+                            }
+                        }
+                    }, true); // Use capture phase to ensure we get the event first
+                }
+                
+                // Fallback to native confirmation if Bootstrap fails
+                function setupFallbackConfirmation() {
+                    console.log('Setting up fallback confirmation');
+                    document.querySelectorAll('[data-delete-form]').forEach(btn => {
+                        btn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            const formId = this.getAttribute('data-delete-form');
+                            const message = this.getAttribute('data-delete-message') || 'Êtes-vous sûr de vouloir supprimer cet élément?';
+                            
+                            if (confirm(message)) {
+                                const form = document.getElementById(formId);
+                                if (form) form.submit();
+                            }
+                        });
+                    });
+                }
+                
+                // Ensure the code runs after DOM and Bootstrap are loaded
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', function() {
+                        // Wait a little bit to ensure Bootstrap is fully initialized
+                        setTimeout(initializeDeleteButtons, 100);
+                    });
+                } else {
+                    // DOM already loaded, wait a bit to ensure Bootstrap is ready
+                    setTimeout(initializeDeleteButtons, 100);
+                }
+            })();
+        </script>
     </body>
 </html>

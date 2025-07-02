@@ -1,0 +1,110 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Partager l'inventaire {{ inventory.name }} - 1ventaire{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+{% endblock %}
+
+{% block body %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+        <a class="navbar-brand" href="{{ path('app_home') }}">1ventaire</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" href="{{ path('app_inventory_index') }}">Mes inventaires</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_category_index') }}">Catégories</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_location_index') }}">Emplacements</a>
+                </li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                        {{ app.user.firstName }}
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ path('app_user_profile') }}">Mon profil</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{{ path('app_logout') }}">Déconnexion</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ path('app_inventory_index') }}">Mes inventaires</a></li>
+            <li class="breadcrumb-item"><a href="{{ path('app_inventory_show', {'id': inventory.id}) }}">{{ inventory.name }}</a></li>
+            <li class="breadcrumb-item active">Partager</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="mb-0">Partager "{{ inventory.name }}"</h2>
+                </div>
+                <div class="card-body">
+                    {{ form_start(form) }}
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            Partagez votre inventaire avec un autre utilisateur en entrant son adresse e-mail.
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_label(form.userEmail) }}
+                            {{ form_widget(form.userEmail, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.userEmail) }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_label(form.accessLevel) }}
+                            <div class="mt-2">
+                                {% for choice in form.accessLevel %}
+                                    <div class="form-check mb-2">
+                                        {{ form_widget(choice, {'attr': {'class': 'form-check-input'}}) }}
+                                        {{ form_label(choice, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            {{ form_errors(form.accessLevel) }}
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ path('app_inventory_show', {'id': inventory.id}) }}" class="btn btn-secondary">Annuler</a>
+                            <button type="submit" class="btn btn-primary">Partager</button>
+                        </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

@@ -18,7 +18,7 @@ services:
       MYSQL_USER: 1ventaire_user
       MYSQL_PASSWORD: 1ventaire_password
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - db_data:/var/lib/mysql
 

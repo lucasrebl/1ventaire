@@ -1,0 +1,115 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvel article - 1ventaire{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+{% endblock %}
+
+{% block body %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+        <a class="navbar-brand" href="{{ path('app_home') }}">1ventaire</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('app_inventory_index') }}">Mes inventaires</a>
+                </li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                        {{ app.user.firstName }}
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">Mon profil</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{{ path('app_logout') }}">Déconnexion</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ path('app_inventory_index') }}">Mes inventaires</a></li>
+            <li class="breadcrumb-item"><a href="{{ path('app_inventory_show', {'id': inventory.id}) }}">{{ inventory.name }}</a></li>
+            <li class="breadcrumb-item active">Nouvel article</li>
+        </ol>
+    </nav>
+    
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="mb-0">Ajouter un article</h2>
+                </div>
+                <div class="card-body">
+                    {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
+                        <div class="mb-3">
+                            {{ form_label(form.name) }}
+                            {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.name) }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_label(form.description) }}
+                            {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 4}}) }}
+                            {{ form_errors(form.description) }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form_label(form.quantity) }}
+                            {{ form_widget(form.quantity, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.quantity) }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form_label(form.barcode) }}
+                            {{ form_widget(form.barcode, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.barcode) }}
+                        </div>
+                        
+
+                        
+                        <div class="mb-3">
+                            {{ form_label(form.expiryDate) }}
+                            {{ form_widget(form.expiryDate, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.expiryDate) }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form_label(form.category) }}
+                            {{ form_widget(form.category, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.category) }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form_label(form.location) }}
+                            {{ form_widget(form.location, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.location) }}
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ path('app_inventory_show', {'id': inventory.id}) }}" class="btn btn-secondary">Annuler</a>
+                            <button type="submit" class="btn btn-primary">Ajouter</button>
+                        </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}
