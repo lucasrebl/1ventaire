@@ -3,11 +3,14 @@ services:
     build: .
     container_name: 1ventaire_app
     ports:
-      - "8080:8000"
+      - "0.0.0.0:8080:9000"  # Écouter sur toutes les interfaces
     volumes:
       - .:/app
     depends_on:
       - database
+    environment:
+      # Configuration pour que Symfony écoute sur toutes les interfaces
+      APP_RUNTIME_ENV: "0.0.0.0"
 
   database:
     image: mysql:8.0.32
@@ -26,7 +29,7 @@ services:
     image: nginx:latest
     container_name: 1ventaire_nginx
     ports:
-      - "8000:80"
+      - "0.0.0.0:8000:80"  # Écouter sur toutes les interfaces
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
       - ./snippets:/etc/nginx/snippets:ro 
