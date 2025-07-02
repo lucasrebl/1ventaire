@@ -5,13 +5,29 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     libzip-dev \
     unzip \
+    git \
     && docker-php-ext-install pdo pdo_mysql zip opcache
 
 # Activer le module rewrite d'Apache
 RUN a2enmod rewrite
 
+# Installer Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Définir le répertoire de travail
 WORKDIR /var/www/html
-COPY . /var/www/html
+
+# Copier les fichiers composer
+COPY composer.json composer.lock symfony.lock ./
+
+# Installer les dépendances PHP sans les scripts ni l'autoloader
+RUN composer install --prefer-dist --no-dev --no-scripts --no-progress --no-autoloader
+
+# Copier le reste du code source
+COPY . .
+
+# Générer l'autoloader avec le bon chemin et exécuter les scripts post-install
+RUN composer dump-autoload --optimize && composer run-script post-install-cmd
 
 # Configurer Apache pour utiliser le répertoire public de Symfony comme DocumentRoot
 RUN sed -i -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
