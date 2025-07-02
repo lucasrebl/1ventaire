@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     unzip \
     git \
-    && docker-php-ext-install pdo pdo_mysql zip opcache
+    && docker-php-ext-install pdo pdo_mysql pdo_pgsql zip opcache
 
 # Activer le module rewrite d'Apache
 RUN a2enmod rewrite
