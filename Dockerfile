@@ -11,8 +11,9 @@ RUN apt-get update && apt-get install -y \
 # Activer le module rewrite d'Apache
 RUN a2enmod rewrite
 
-# Installer Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Installer Composer - méthode officielle
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \
+    && chmod +x /usr/local/bin/composer
 
 # Définir le répertoire de travail
 WORKDIR /var/www/html
@@ -20,14 +21,16 @@ WORKDIR /var/www/html
 # Copier les fichiers composer
 COPY composer.json composer.lock symfony.lock ./
 
-# Installer les dépendances PHP sans les scripts ni l'autoloader
-RUN composer install --prefer-dist --no-dev --no-scripts --no-progress --no-autoloader
+# Installer les dépendances PHP
+RUN composer install --prefer-dist --no-dev --optimize-autoloader --no-scripts
 
 # Copier le reste du code source
 COPY . .
 
-# Générer l'autoloader avec le bon chemin et exécuter les scripts post-install
-RUN composer dump-autoload --optimize && composer run-script post-install-cmd
+# Exécuter les scripts post-install et nettoyer le cache
+RUN composer dump-autoload --optimize \
+    && php bin/console cache:clear --env=prod --no-warmup \
+    && php bin/console cache:warmup --env=prod
 
 # Configurer Apache pour utiliser le répertoire public de Symfony comme DocumentRoot
 RUN sed -i -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
