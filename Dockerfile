@@ -1,20 +1,34 @@
-FROM php:8.2-fpm
+FROM php:8.2-apache
 
 # Installer les extensions nécessaires
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     libzip-dev \
     unzip \
-    && docker-php-ext-install pdo pdo_mysql
+    && docker-php-ext-install pdo pdo_mysql zip opcache
 
-WORKDIR /app
-COPY . /app
+# Activer le module rewrite d'Apache
+RUN a2enmod rewrite
 
-# Configurer PHP-FPM pour écouter sur 0.0.0.0:9000
-RUN echo "listen = 0.0.0.0:9000" >> /usr/local/etc/php-fpm.d/www.conf
+WORKDIR /var/www/html
+COPY . /var/www/html
 
-# Exposer le port pour PHP-FPM
-EXPOSE 9000
+# Configurer Apache pour utiliser le répertoire public de Symfony comme DocumentRoot
+RUN sed -i -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
+RUN sed -i -e 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
 
-# Pour Render: configurer une commande pour démarrer PHP-FPM en avant-plan
-CMD ["php-fpm", "--nodaemonize"]
+# Configurer Apache pour écouter sur 0.0.0.0:PORT où PORT sera défini par l'environnement Render
+RUN sed -i 's/Listen 80/Listen ${PORT:-80}/g' /etc/apache2/ports.conf
+RUN sed -i 's/:80/:${PORT:-80}/g' /etc/apache2/sites-available/000-default.conf
+
+# Changer les permissions pour les dossiers de cache et de logs
+RUN mkdir -p /var/www/html/var/cache /var/www/html/var/log \
+    && chmod -R 777 /var/www/html/var
+
+# Exposer le port sur lequel Apache écoutera
+EXPOSE ${PORT:-80}
+
+# Script de démarrage pour lire PORT de l'environnement Render
+COPY --chmod=755 ./docker-entrypoint.sh /usr/local/bin/docker-entrypoint
+ENTRYPOINT ["docker-entrypoint"]
+CMD ["apache2-foreground"]
