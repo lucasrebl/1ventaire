@@ -11,7 +11,8 @@ fi
 # Installation des dépendances avec Composer si vendor n'existe pas
 if [ ! -d "vendor" ] || [ ! -f "vendor/autoload.php" ]; then
   echo "Installing Composer dependencies..."
-  composer install --prefer-dist --no-dev --optimize-autoloader --no-interaction
+  # Installer toutes les dépendances y compris celles de développement
+  composer install --optimize-autoloader --no-interaction
 fi
 
 # Vérifie si le fichier d'autoload existe
